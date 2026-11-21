@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lumen Student Insight</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* VOICE work: a mentor's working tool, calm, precise, strengths-first
+   IDEA a light table: each student held up to the light, every domain read as how brightly he is thriving
+   PICTURE the 20-week thrive trajectory as a solid lit mass climbing to today's score, domain pulse rows beside it
+   COLOUR deep lagoon band #0B2E33, white ground, teal #0E9494 lead, coral #E8613C accent, indigo #5B5BD6 support
+   TYPE Manrope 800 display + Inter text
+   LAYOUT laptop: band with picker + tabs, identity strip, finding title, chart 2/3 + pulse rows 1/3; phone: stacked */
+:root{color-scheme:light dark;
+--bg:light-dark(#FFFFFF,#0C1A1B);--panel:light-dark(#F4F8F8,#122426);--line:light-dark(#DCE6E6,#24393B);
+--ink:light-dark(#122326,#E6EFEF);--ink2:light-dark(#4E6266,#A9BCBE);--ink3:light-dark(#6E8185,#8DA1A3);
+--band:light-dark(#0B2E33,#071E21);--bandink:#E8F3F3;--bandink2:#9FC3C4;
+--s1:light-dark(#0E9494,#11A39F);--s2:light-dark(#E8613C,#E8653F);--s3:light-dark(#5B5BD6,#7B7BEB);
+--s1soft:light-dark(#D7EFEE,#163B3B);--gray:light-dark(#B9C6C7,#4A5E60);
+--good:light-dark(#1F7F55,#3DB27E);--warn:light-dark(#A86400,#E0A040);--crit:light-dark(#C2364E,#F06A80);
+--goodbg:light-dark(#E3F3EA,#14301F);--warnbg:light-dark(#FBF0DC,#33270F);--critbg:light-dark(#FBE5E9,#3A1A20)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 Inter,system-ui,sans-serif;overflow-x:clip}
+h1,h2,h3{font-family:Manrope,Inter,sans-serif;letter-spacing:-.02em;margin:0;color:var(--ink)}
+button,input{font:inherit;color:inherit}
+.wrap{max-width:1240px;margin:0 auto;padding:0 max(16px,3vw)}
+.top{background:var(--band);color:var(--bandink)}
+.topin{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding-top:14px;padding-bottom:6px}
+.brand{display:flex;align-items:center;gap:10px;margin-right:auto}
+.brand b{font:800 22px/1 Manrope,sans-serif;letter-spacing:-.03em}
+.brand span{color:var(--bandink2);font-size:13px}
+.brand .ds{font-style:normal;font-weight:700;letter-spacing:.02em;color:#D4AE72}
+.picker{position:relative}
+.pickbtn{display:flex;align-items:center;gap:10px;min-height:44px;padding:6px 14px;border-radius:10px;border:1px solid #2C5257;background:#103C42;cursor:pointer;color:var(--bandink)}
+.pickbtn:hover{background:#15474E}.pickbtn:focus-visible,.tab:focus-visible,.seg button:focus-visible,.row-btn:focus-visible{outline:2px solid var(--s2);outline-offset:2px}
+.pickbtn small{color:var(--bandink2)}
+.pop{position:absolute;right:0;top:calc(100% + 6px);width:min(360px,92vw);background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.18);z-index:20;display:none}
+.pop.open{display:block}
+.pop input{width:100%;font-size:16px;padding:12px 14px;border:0;border-bottom:1px solid var(--line);background:transparent;border-radius:12px 12px 0 0}
+.pop input:focus{outline:none;background:var(--panel)}
+.plist{max-height:340px;overflow:auto;padding:6px}
+.pgrp{font-size:12px;color:var(--ink3);padding:8px 8px 2px;font-weight:600}
+.popt{display:flex;justify-content:space-between;gap:8px;width:100%;text-align:left;border:0;background:none;padding:9px 10px;border-radius:8px;cursor:pointer}
+.popt:hover,.popt.on{background:var(--panel)}
+.tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+.tab{flex:none;border:0;background:none;color:var(--bandink2);padding:12px 14px 13px;cursor:pointer;font-weight:600;border-bottom:3px solid transparent;min-height:44px}
+.tab:hover{color:#fff}.tab.on{color:#fff;border-bottom-color:var(--s2)}
+.id{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:16px 20px;align-items:center;padding-top:22px;padding-bottom:18px;border-bottom:1px solid var(--line)}
+.av{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;font:800 19px Manrope,sans-serif;background:var(--s1soft);color:var(--s1)}
+.id h2{font-size:clamp(22px,3vw,28px);line-height:1.1}
+.meta{color:var(--ink2);font-size:14px;margin-top:4px}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.tag{font-size:12px;font-weight:600;padding:3px 9px;border-radius:99px;background:var(--panel);color:var(--ink2);border:1px solid var(--line)}
+.thrive{text-align:right}
+.thrive .n{font:800 clamp(38px,5vw,52px)/1 Manrope,sans-serif;letter-spacing:-.03em;color:var(--s1)}
+.thrive .l{font-size:13px;color:var(--ink2)}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;padding:2px 9px 2px 7px;border-radius:99px;white-space:nowrap}
+.chip svg{width:12px;height:12px}
+.c-good{background:var(--goodbg);color:var(--good)}.c-warn{background:var(--warnbg);color:var(--warn)}.c-crit{background:var(--critbg);color:var(--crit)}
+.view{display:none;padding-top:22px;padding-bottom:40px}.view.on{display:block}
+.vh{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.vh h1{font-size:clamp(24px,3.2vw,34px);line-height:1.08;max-width:30ch;text-wrap:balance}
+.vh p{margin:6px 0 0;color:var(--ink2);max-width:70ch}
+.grid{display:grid;gap:16px}
+.g21{grid-template-columns:minmax(0,2fr) minmax(0,1fr)}
+.g11{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.g111{grid-template-columns:repeat(3,minmax(0,1fr))}
+.card{border:1px solid var(--line);border-radius:14px;padding:16px 18px;background:var(--bg)}
+.card.tint{background:var(--panel)}
+.card h3{font-size:16px;margin-bottom:2px}
+.sub{color:var(--ink3);font-size:13px;margin:0 0 12px}
+.fig{position:relative;min-height:260px}.fig>svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.fig.tall{min-height:320px}.fig.short{min-height:200px}
+svg text{font:12px Inter,sans-serif;fill:var(--ink3)}
+svg .lbl{fill:var(--ink);font-weight:600;paint-order:stroke;stroke:var(--bg);stroke-width:4px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px}
+.kpi{border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.kpi .v{font:800 26px/1.1 Manrope,sans-serif;letter-spacing:-.02em;white-space:nowrap}
+.kpi .k{font-size:13px;color:var(--ink2)}
+.kpi .d{font-size:12px;color:var(--ink3);margin-top:2px}
+.up{color:var(--good)}.down{color:var(--crit)}
+.prow{display:grid;grid-template-columns:minmax(92px,1.1fr) minmax(0,1.4fr) 34px minmax(54px,.8fr) auto;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--line)}
+.prow:first-of-type{border-top:0}
+.prow .nm{font-weight:600;font-size:14px}
+.track{height:8px;border-radius:4px;background:var(--panel);position:relative;overflow:hidden}
+.track i{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:var(--s1)}
+.num{font-variant-numeric:tabular-nums;text-align:right;font-weight:600;white-space:nowrap}
+.spark{width:100%;height:26px;display:block}
+.pr2{padding:8px 0;border-top:1px solid var(--line)}
+.pr2:first-of-type{border-top:0}
+.ptop{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:5px}
+.ptop .nm{font-weight:600;font-size:14px}
+.pbot{display:grid;grid-template-columns:minmax(0,1.3fr) 30px minmax(50px,1fr) 34px;gap:10px;align-items:center}
+.riskcap{font-size:12px;color:var(--ink3);margin:14px 0 2px;padding-top:10px;border-top:2px solid var(--line)}
+.brow{display:grid;grid-template-columns:minmax(90px,150px) minmax(0,1fr) 52px;gap:10px;align-items:center;padding:5px 0;font-size:14px}
+.btrack{height:14px;position:relative;background:var(--panel);border-radius:3px}
+.btrack i{position:absolute;left:0;top:0;bottom:0;border-radius:0 4px 4px 0;background:var(--s1)}
+.btrack .mk{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--ink)}
+.strip{position:relative;height:28px;border-top:1px solid var(--line)}
+.strip .dt{position:absolute;top:9px;width:10px;height:10px;border-radius:50%;background:var(--gray);transform:translateX(-50%);opacity:.8}
+.strip .me{top:6px;width:16px;height:16px;background:var(--s1);border:2px solid var(--bg);opacity:1;z-index:2}
+.srow{display:grid;grid-template-columns:110px minmax(0,1fr) 92px;gap:10px;align-items:center;font-size:14px}
+.sig{display:grid;grid-template-columns:22px minmax(0,1fr);gap:10px;padding:12px 0;border-top:1px solid var(--line)}
+.sig:first-of-type{border-top:0}
+.sig svg{width:18px;height:18px;margin-top:2px}
+.sig b{display:block;font-size:14px}
+.sig p{margin:2px 0 0;font-size:14px;color:var(--ink2)}
+.sig .act{color:var(--ink);margin-top:6px}
+.qlist{margin:6px 0 0;padding-left:20px}.qlist li{margin:6px 0}
+.pill{display:inline-block;font-size:12px;padding:2px 8px;border-radius:6px;background:var(--panel);border:1px solid var(--line);margin:0 4px 4px 0}
+.tl{list-style:none;margin:0;padding:0}
+.tl li{display:grid;grid-template-columns:76px 12px minmax(0,1fr);gap:10px;padding:7px 0;font-size:14px}
+.tl .dot{width:10px;height:10px;border-radius:50%;margin-top:6px;background:var(--s1)}
+.tl time{color:var(--ink3);font-size:13px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th{font-weight:600;color:var(--ink2);text-align:left;font-size:13px;border-bottom:1px solid var(--line);padding:8px 8px}
+td{border-bottom:1px solid var(--line);padding:8px 8px;vertical-align:top}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.heat td.h{text-align:center;font-weight:700;border:2px solid var(--bg);border-radius:6px;min-width:44px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;padding:3px;background:var(--panel);flex-wrap:wrap}
+.seg button{border:0;background:none;padding:8px 12px;border-radius:7px;cursor:pointer;min-height:38px;font-weight:600;color:var(--ink2)}
+.seg button.on{background:var(--bg);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:13px;color:var(--ink2);margin-bottom:6px}
+.legend i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:6px}
+.legend i.dash{background:repeating-linear-gradient(90deg,var(--ink3) 0 4px,transparent 4px 7px)!important}
+.legend i.box{height:10px;opacity:.35}
+.db{display:grid;grid-template-columns:minmax(120px,1.2fr) minmax(0,2fr) 44px;gap:10px;align-items:center;padding:6px 0;font-size:14px}
+.dbt{position:relative;height:20px}
+.dbt:before{content:"";position:absolute;left:0;right:0;top:9px;height:2px;background:var(--panel)}
+.dbt .ln{position:absolute;top:9px;height:2px;background:var(--gray)}
+.dbt .a,.dbt .b{position:absolute;top:4px;width:12px;height:12px;border-radius:50%;transform:translateX(-50%);border:2px solid var(--bg)}
+.dbt .a{background:var(--s1)}.dbt .b{background:var(--gray)}
+.empty{padding:22px;border:1px dashed var(--line);border-radius:12px;color:var(--ink2);text-align:center}
+.quote{border-left:3px solid var(--s1);padding:6px 12px;margin:8px 0;color:var(--ink2);font-size:14px}
+.watch{cursor:pointer}.watch:hover td{background:var(--panel)}
+.row-btn{border:0;background:none;padding:0;cursor:pointer;font-weight:600;text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px}
+#tip{position:fixed;pointer-events:none;z-index:50;background:var(--ink);color:var(--bg);font-size:13px;padding:7px 10px;border-radius:8px;max-width:240px;opacity:0;transition:opacity .1s;line-height:1.4}
+#tip b{font-weight:600}
+foot,.foot{display:block;border-top:1px solid var(--line);padding-top:16px;padding-bottom:40px;color:var(--ink3);font-size:13px}
+.foot details{margin-top:10px}.foot summary{cursor:pointer;color:var(--ink2);font-weight:600}
+.foot code{font-size:12px;overflow-wrap:anywhere}
+@media(max-width:900px){.g21,.g111{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:700px){.pbot{grid-template-columns:minmax(0,1fr) 30px 34px}.pbot .sp{display:none}.g11{grid-template-columns:minmax(0,1fr)}.id{grid-template-columns:auto minmax(0,1fr)}.thrive{grid-column:1/-1;text-align:left;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}.prow{grid-template-columns:minmax(84px,1fr) minmax(0,1fr) 30px auto}.prow .sp{display:none}.brand span{display:none}}
+@media(max-width:600px){table{font-size:13px}th,td{padding:6px 4px}.stack thead{display:none}.stack tr{display:grid;padding-block:8px;border-bottom:1px solid var(--line)}.stack td{display:flex;justify-content:space-between;gap:12px;border:0;padding:3px 0;text-align:right}.stack td::before{content:attr(data-l);color:var(--ink3);text-align:left;flex:none}}
+@media(prefers-reduced-motion:no-preference){.grow{animation:grow .7s ease-out both}@keyframes grow{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap topin">
+    <div class="brand">
+      <img src="data:image/png;base64,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" width="44" height="38" alt="Data Schola">
+      <b>Lumen</b><span>Student insight</span>
+    </div>
+    <div class="picker">
+      <button class="pickbtn" id="pickbtn" aria-haspopup="listbox" aria-expanded="false"><span id="pickname">Select a student</span><small id="pickyr"></small><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></button>
+      <div class="pop" id="pop"><input id="q" type="search" placeholder="Search name or code" autocomplete="off"><div class="plist" id="plist" role="listbox"></div></div>
+    </div>
+  </div>
+  <nav class="wrap tabs" id="tabs" aria-label="Views"></nav>
+</header>
+<div class="wrap id" id="ident"></div>
+<main class="wrap">
+  <section class="view" id="v-pulse"></section>
+  <section class="view" id="v-learning"></section>
+  <section class="view" id="v-attendance"></section>
+  <section class="view" id="v-wellbeing"></section>
+  <section class="view" id="v-growth"></section>
+  <section class="view" id="v-support"></section>
+  <section class="view" id="v-cohort"></section>
+</main>
+<div id="tip" role="tooltip"></div>
+<script>
+{
+/* ---------- deterministic demo data ---------- */
+const rng = seed => () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const r1 = v => Math.round(v * 10) / 10;
+const last = a => a[a.length - 1];
+const pick = (R, a) => a[Math.floor(R() * a.length)];
+const norm = R => { let u = 0; for (let i = 0; i < 6; i++) u += R(); return (u - 3) / 1.0; };
+const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const fmtD = d => d.getDate() + ' ' + MON[d.getMonth()];
+const WEEKS = [];
+{ const t2 = new Date(2026, 3, 27), t3 = new Date(2026, 6, 20);
+  for (let i = 0; i < 10; i++) WEEKS.push({ d: new Date(t2.getTime() + i * 7 * 864e5), lab: 'T2 W' + (i + 1) });
+  for (let i = 0; i < 10; i++) WEEKS.push({ d: new Date(t3.getTime() + i * 7 * 864e5), lab: 'T3 W' + (i + 1) }); }
+const WL = WEEKS.map(w => w.lab), NW = WEEKS.length;
+const DOMAINS = [
+  { k: 'aca', n: 'Academic', w: .25 }, { k: 'att', n: 'Attendance', w: .25 }, { k: 'beh', n: 'Behaviour', w: .15 },
+  { k: 'lp', n: 'Dispositions', w: .15 }, { k: 'lit', n: 'Literacy', w: .05 }, { k: 'co', n: 'Co-curricular', w: .15 }];
+const FIRST = ['Oliver','Lachlan','Aarav','James','Ethan','Kai','Mateo','Leo','Hamish','Jun','Arjun','Noah','Samuel','Theo','Hugo','Felix','Isaac','Marcus','Ryan','Daniel','Lucas','Rohan','Harry','Callum','Tom','Max','Zac','Ben','Elijah','Sebastian','Nikhil','Jack','William','Patrick','Owen','Ari'];
+const LAST = ['Tran','Mehta','O’Connor','Nguyen','Patel','Walsh','Kim','Rossi','Fraser','Chen','Lim','Hughes','Singh','Murphy','Costa','Papadopoulos','Ito','Byrne','Morrison','Ahmed','Silva','Fitzgerald','Park','Wong','Dimitriou','Kelly','Novak','Reid','Bose','Hall','Lee','Gomez','Turner','Haddad','Clarke','Moreau'];
+const HOUSES = ['Banks','Florey','Mawson','Oliphant','Hargrave','Kingsford'];
+const MENTORS = ['Ms Calder','Mr Okafor','Dr Lindqvist','Ms Moretti','Mr Achterberg','Ms Yeo','Mr Delaney','Ms Farouk'];
+const SUBJ_JR = ['English','Mathematics','Science','History','Geography','PDHPE','Music','Design & Technology','French'];
+const SUBJ_SR = ['English Advanced','Mathematics Ext 1','Physics','Chemistry','Economics','Modern History'];
+const TERMS = ['T4 2025','T1 2026','T2 2026','T3 2026'];
+const LP_ITEMS = [['Perseverance','Persists with challenging tasks'],['Perseverance','Completes work to a high standard'],['Mindset','Responds to feedback'],['Mindset','Shows curiosity'],['Social','Works well with others'],['Social','Contributes to class'],['Behavioural','Organised and prepared'],['Behavioural','Follows class routines']];
+const LEX_NORM = { 7: [880, 1010, 1140], 8: [930, 1060, 1190], 9: [980, 1110, 1240], 10: [1020, 1150, 1280], 11: [1060, 1190, 1310], 12: [1080, 1210, 1340] };
+const STAFF = ['Mr Haines','Ms Duarte','Mr Coleman','Ms Varga','Mr Sato','Ms Eriksen','Mr Pillay','Ms Grant'];
+const POS_HEAD = ['Outstanding effort in class','Helped a peer through a difficult task','Excellent contribution to discussion','Represented the school with distinction','Consistent organisation and preparation','Thoughtful leadership in group work'];
+const NEG_HEAD = ['Not prepared for class','Late to class without reason','Disruptive during lesson','Homework not submitted','Device used off-task','Uniform not to standard','Conflict with a peer at lunch'];
+const ACTS = { Sport: ['Rugby, 15B','Basketball, 14A','Rowing squad','Cross country','Tennis','Water polo'], 'Performing arts': ['Symphonic Wind Ensemble','Senior Choir','Drama, school musical','Jazz Band'], Leadership: ['House captain','Peer mentor','SRC representative','Library prefect'], Cadets: ['Cadet Unit, Lance Corporal','Cadet Unit, Cadet'], Academic: ['Debating, A team','Robotics club','Chess club','Mock Trial'], Service: ['Community service, Meals on Wheels','Environment group'] };
+const COMPS = ['Australian Mathematics Competition','ICAS English','ICAS Science','Da Vinci Decathlon','Australian Geography Competition','UNSW Global Writing'];
+const ADJ = ['Extra time in assessments','Seating near the front','Chunked instructions','Scheduled rest breaks','Assistive technology','Reader/writer support','Weekly mentor check-in','Copies of class notes'];
+
+function makeStudent(i) {
+  const R = rng(9001 + i * 131);
+  const year = 7 + Math.floor(i / 12);
+  const name = FIRST[(i * 7 + 3) % FIRST.length] + ' ' + LAST[(i * 11 + 5) % LAST.length];
+  const s = { i, year, name, code: 'K' + (20 + (12 - year)) + String(1000 + i * 37).slice(-4), house: pick(R, HOUSES), mentor: pick(R, MENTORS) };
+  s.boarder = R() < .25; s.eald = R() < .12; s.intl = R() < .08; s.dl = R() < .24; s.fn = R() < .04;
+  const base = Math.pow(R(), 1.5) * .75 + (s.dl ? .1 : 0);
+  const trend = (R() - .5) * 2;
+  s.risk = {};
+  DOMAINS.forEach(d => {
+    const off = norm(R) * 22, slope = trend * (1.2 + R()) + norm(R) * .4;
+    const latest = clamp(base * 95 + off + 8, 3, 97);
+    s.risk[d.k] = WL.map((_, w) => clamp(latest - slope * (NW - 1 - w) + norm(R) * 1.4, 2, 98));
+  });
+  s.thriveD = {}; DOMAINS.forEach(d => s.thriveD[d.k] = s.risk[d.k].map(v => 100 - v));
+  s.thrive = WL.map((_, w) => DOMAINS.reduce((a, d) => a + d.w * s.thriveD[d.k][w], 0));
+  s.ext = WL.map((_, w) => clamp((1 - base) * 70 + 10 * Math.sin(i) + w * .4 * (i % 2 ? 1 : -.5) + norm(R) * 1.1, 4, 98));
+  s.lead = WL.map((_, w) => clamp(100 - s.risk.lp[w] * .7 - 10 + (i % 5) * 4 + norm(R) * 1.1, 4, 98));
+  // learning
+  const subs = year >= 11 ? SUBJ_SR : SUBJ_JR;
+  const acaLv = (50 - s.risk.aca[NW - 1]) / 30;
+  s.subjects = subs.map(n => {
+    const ab = r1(clamp(acaLv * .7 + norm(R) * .45 + .2, -2.4, 2.4));
+    const drift = norm(R) * .18 + (trend > .3 ? -.12 : 0);
+    const gapBias = R() < .25 ? -(.5 + R() * .5) : norm(R) * .3;
+    const z = TERMS.map((_, t) => r1(clamp(ab + gapBias + drift * (t - 3) + norm(R) * .15, -2.6, 2.6)));
+    const att = r1(clamp(100 - s.risk.att[NW - 1] * .26 + norm(R) * 3, 62, 100));
+    const lp = ['Perseverance','Mindset','Social','Behavioural'].map(() => r1(clamp(4.3 - s.risk.lp[NW - 1] / 34 + norm(R) * .45, 1, 5)));
+    return { n, ab, z, att, lp };
+  });
+  // attendance
+  s.attW = WL.map((_, w) => r1(clamp(99.2 - s.risk.att[w] * .27 + norm(R) * 1.8, 55, 100)));
+  const avg = a => a.reduce((x, y) => x + y, 0) / a.length;
+  s.win = [['Last 7 days', s.attW[NW - 1]], ['Last 14 days', avg(s.attW.slice(-2))], ['Last 30 days', avg(s.attW.slice(-4))], ['Term 3', avg(s.attW.slice(10))], ['Year to date', avg(s.attW) - .4]].map(([k, v]) => [k, r1(v)]);
+  s.winEx = s.win.map(([k, v]) => [k, r1(Math.min(100, v + 1 + R() * 1.5))]);
+  const conc = Math.max(0, Math.round((100 - s.win[3][1]) / 1.6 + norm(R)));
+  const wbias = R() < .45 ? [2.2, 1, 1, 1, 1.8] : [1, 1, 1, 1, 1];
+  s.wkAbs = [0, 0, 0, 0, 0]; for (let k = 0; k < conc; k++) { let t = R() * wbias.reduce((a, b) => a + b), j = 0; while (t > wbias[j]) { t -= wbias[j]; j++; } s.wkAbs[Math.min(j, 4)]++; }
+  s.p1 = Math.round(conc * (.25 + R() * .3));
+  s.lateClass = Math.round(s.risk.att[NW - 1] / 9 + R() * 3); s.lateSchool = Math.round(s.risk.att[NW - 1] / 14 + R() * 2);
+  s.streak = conc > 3 ? 1 + Math.floor(R() * Math.min(4, conc / 2)) : (conc ? 1 : 0);
+  s.dis = WL.map((_, w) => clamp(.55 * s.risk.att[w] + .35 * s.risk.beh[w] - 8 + norm(R) * 2.2, 2, 98));
+  { const dl = last(s.dis); s.disC = [['Lateness rate', .40], ['Event volume', .20], ['Subject concentration', .15], ['Minutes lost', .25]].map(([n, wt]) => ({ n, wt, v: Math.round(clamp(dl + norm(R) * 12, 0, 100)) })); s.dis[NW - 1] = s.disC.reduce((a, c) => a + c.wt * c.v, 0); }
+  s.minsLost = Math.round(s.lateClass * 7 + R() * 20); s.concLate = Math.round(s.lateClass * .6); s.disSubj = pick(R, subs);
+  const types = [['Unexplained', 'No reason provided'], ['Medical', 'Unwell'], ['Medical', 'Appointment'], ['Leave', 'Family commitment'], ['School activity', 'Representative sport']];
+  s.absLog = [];
+  const nAbs = conc + Math.floor(R() * 3);
+  for (let k = 0; k < nAbs; k++) { const wk = 10 + Math.floor(R() * 10), dow = Math.floor(R() * 5), t = k < conc ? (R() < .45 ? types[0] : pick(R, types.slice(1, 4))) : types[4]; const d = new Date(WEEKS[wk].d.getTime() + dow * 864e5); s.absLog.push({ d, subj: pick(R, subs), per: 'P' + (1 + Math.floor(R() * 6)), type: t[0], reason: t[1], mins: pick(R, [50, 50, 100, 300]), ok: t[0] !== 'Unexplained' }); }
+  s.absLog.sort((a, b) => b.d - a.d);
+  // behaviour
+  s.pos = WL.map((_, w) => Math.max(0, Math.round(1.2 + (100 - s.risk.beh[w]) / 38 + norm(R) * 1.1)));
+  s.neg = WL.map((_, w) => Math.max(0, Math.round(s.risk.beh[w] / 34 - .4 + norm(R) * .8)));
+  s.wkNeg = [0, 0, 0, 0, 0]; s.neg.slice(10).forEach(n => { for (let k = 0; k < n; k++) s.wkNeg[Math.floor(R() * (R() < .3 ? 2 : 5)) % 5]++; });
+  const tP = s.pos.slice(10).reduce((a, b) => a + b, 0), tN = s.neg.slice(10).reduce((a, b) => a + b, 0);
+  s.depts = ['Academic', 'Pastoral', 'Co-curricular', s.boarder ? 'Boarding' : 'Library'].map((n, k) => { const f = [.45, .3, .17, .08][k]; return { n, p: Math.round(tP * f * (.7 + R() * .6)), q: Math.round(tN * [.35, .4, .15, .1][k] * (.7 + R() * .6)) }; });
+  s.conduct = [];
+  for (let w = NW - 1; w >= 10 && s.conduct.length < 9; w--) { for (let k = 0; k < s.neg[w] && s.conduct.length < 9; k++) s.conduct.push({ d: new Date(WEEKS[w].d.getTime() + Math.floor(R() * 5) * 864e5), pos: false, h: pick(R, NEG_HEAD), by: pick(R, STAFF), dept: pick(R, ['Academic', 'Pastoral', 'Co-curricular']) }); if (R() < .6 && s.pos[w]) s.conduct.push({ d: new Date(WEEKS[w].d.getTime() + Math.floor(R() * 5) * 864e5), pos: true, h: pick(R, POS_HEAD), by: pick(R, STAFF), dept: pick(R, ['Academic', 'Pastoral', 'Co-curricular']) }); }
+  s.conduct.sort((a, b) => b.d - a.d);
+  const themesN = ['Organisation', 'Disengagement', 'Peer conflict', 'Technology misuse', 'Wellbeing check-in'];
+  s.themes = themesN.map(n => ({ n, c: Math.round(tN * R() * .6) })).filter(t => t.c > 0).concat([{ n: 'Positive recognition', c: Math.round(tP * .4) }]).sort((a, b) => b.c - a.c);
+  // dispositions
+  s.lp = LP_ITEMS.map(([dim, item], k) => ({ dim, item, me: r1(clamp(4.25 - s.risk.lp[NW - 1] / 33 + norm(R) * .4, 1, 5)), co: r1(3.55 + ((k * 7 + year) % 5) * .08) }));
+  // literacy
+  const nrm = LEX_NORM[year];
+  let lx = nrm[1] + (50 - s.risk.lit[NW - 1]) * 3.2 - 40 + norm(R) * 40; const g = clamp(5.5 - s.risk.lit[NW - 1] / 20, 0, 6);
+  s.lex = WL.map((_, w) => { lx += g + norm(R) * 6; return Math.round(lx); });
+  s.lexCo = WL.map((_, w) => Math.round(nrm[1] - 20 + w * 3.4));
+  s.quiz = WL.map(() => Math.max(0, Math.round(3 - s.risk.lit[NW - 1] / 30 + norm(R))));
+  s.pass = r1(clamp(92 - s.risk.lit[NW - 1] * .45 + norm(R) * 4, 35, 100));
+  // co-curricular & achievement
+  const nAct = clamp(Math.round(4.6 - s.risk.co[NW - 1] / 22 + R()), 0, 6);
+  const cats = Object.keys(ACTS); s.acts = [];
+  for (let k = 0; k < nAct; k++) { const c = cats[(k * 3 + i) % cats.length]; if (c === 'Leadership' && year < 9) continue; const a = pick(R, ACTS[c]); if (!s.acts.some(x => x.a === a)) s.acts.push({ c, a, t: R() < .5 ? 'Terms 2–3' : 'Term 3' }); }
+  s.comps = COMPS.filter(() => R() < .38 + (1 - base) * .3).map(c => { const z = r1(clamp(acaLv * .8 + norm(R) * .5, -1.8, 2.6)); return { c, z, r: z > 1.6 ? 'High Distinction' : z > .9 ? 'Distinction' : z > .2 ? 'Credit' : 'Participation' }; });
+  s.allwell = Math.round(clamp(50 + acaLv * 28 + norm(R) * 8, 3, 99));
+  s.allwellSat = new Date(2026 - (year - 7), 1, 12 + (i % 5));
+  s.allwellD = ['Verbal reasoning', 'Numerical reasoning', 'Non-verbal reasoning', 'Reading', 'Mathematics', 'Written expression'].map(n => ({ n, p: Math.round(clamp(s.allwell + norm(R) * 11, 2, 99)) }));
+  const lvl = v => v > 1 ? 'Exceeding' : v > -.2 ? 'Strong' : v > -1.1 ? 'Developing' : 'Needs additional support';
+  s.naplan = [];
+  if (year >= 8) s.naplan.push({ yr: 7, res: ['Reading', 'Writing', 'Spelling', 'Grammar & punctuation', 'Numeracy'].map(d => [d, lvl(acaLv + norm(R) * .5)]) });
+  if (year >= 10) s.naplan.push({ yr: 9, res: ['Reading', 'Writing', 'Spelling', 'Grammar & punctuation', 'Numeracy'].map(d => [d, lvl(acaLv + norm(R) * .5)]) });
+  // lateness
+  const SLOT = { Sport: ['P1', [1, 3], 'morning training ran over'], 'Performing arts': ['P5', [0, 2], 'lunchtime rehearsal ran over'], Cadets: ['P1', [4], 'parade ran over'], Academic: ['P5', [3], 'club session ran over'] };
+  const coActs = s.acts.filter(a => SLOT[a.c]).slice(0, 3).map(a => ({ ...a, slot: SLOT[a.c][0], days: SLOT[a.c][1], why: SLOT[a.c][2], load: .25 + R() * .45, subj: subs[(SLOT[a.c][0] === 'P1' ? 1 : 3 + a.a.length) % subs.length] }));
+  s.coActs = coActs; s.lateEv = [];
+  const lr = w => s.risk.att[w];
+  WL.forEach((_, w) => {
+    const day = d => new Date(WEEKS[w].d.getTime() + d * 864e5);
+    const nS = Math.max(0, Math.round(lr(w) / 45 - .7 + norm(R) * .45)), nC = Math.max(0, Math.round(lr(w) / 32 - .6 + norm(R) * .55));
+    for (let k = 0; k < nS; k++) s.lateEv.push({ w, d: day(Math.floor(R() * 5)), kind: 'school', per: 'Roll call', subj: 'Homeroom', mins: 5 + Math.floor(R() * 20), reason: pick(R, ['Transport delay', 'Overslept', 'No reason given', 'Medical appointment']) });
+    for (let k = 0; k < nC; k++) s.lateEv.push({ w, d: day(Math.floor(R() * 5)), kind: 'class', per: 'P' + (2 + Math.floor(R() * 5)), subj: pick(R, subs), mins: 3 + Math.floor(R() * 12), reason: pick(R, ['No reason given', 'Lingering between classes', 'Went to locker', 'Sick bay visit']) });
+    coActs.forEach(a => a.days.forEach(dd => { if (R() < a.load) s.lateEv.push({ w, d: day(dd), kind: 'co', per: a.slot, subj: a.subj, mins: 8 + Math.floor(R() * 18), reason: a.a + ' ' + a.why, act: a.a }); }));
+  });
+  s.lateEv.sort((a, b) => b.d - a.d);
+  { const t3 = s.lateEv.filter(e => e.w >= 10), cnt = k => t3.filter(e => e.kind === k);
+    s.lateSchool = cnt('school').length; s.lateClass = cnt('class').length + cnt('co').length; s.concLate = cnt('class').length;
+    s.minsLost = cnt('class').reduce((a, e) => a + e.mins, 0);
+    const bySub = {}; cnt('class').forEach(e => bySub[e.subj] = (bySub[e.subj] || 0) + 1);
+    s.disSubj = Object.keys(bySub).sort((a, b) => bySub[b] - bySub[a])[0] || subs[0]; }
+  // care
+  if (s.dl) {
+    const lv = pick(R, ['Quality differentiated teaching practice', 'Supplementary', 'Supplementary', 'Substantial']);
+    const ad = ADJ.filter(() => R() < .4).slice(0, 5); if (!ad.length) ad.push(ADJ[0], ADJ[2]);
+    s.plan = { lv, cat: pick(R, ['Cognitive', 'Social/emotional', 'Cognitive', 'Physical']), ad, prov: pick(R, ['Learning support teacher, 2 lessons a week', 'In-class learning assistant, Maths and English', 'Counsellor check-in, fortnightly']),
+      sv: pick(R, ['I work best when I know what is coming next in the lesson.', 'Extra time helps me show what I actually know.', 'Sitting near the front stops me getting distracted.']),
+      pv: pick(R, ['He is more settled this term and talks about school more at home.', 'We would like more notice before major assessments.', 'Homework routines are still a struggle at home.']),
+      log: [{ d: new Date(2026, 1, 9), t: 'Plan created', v: lv }, { d: new Date(2026, 4, 18), t: 'Adjustment added', v: ad[0] }, { d: new Date(2026, 7, 3), t: 'Plan reviewed with family', v: 'No change to level' }] };
+  }
+  return s;
+}
+const STUDENTS = Array.from({ length: 72 }, (_, i) => makeStudent(i));
+const band = v => v >= 67 ? ['good', 'On track'] : v >= 34 ? ['warn', 'Watch'] : ['crit', 'Act now'];
+const ICON = { good: '<svg viewBox="0 0 12 12"><path d="M2.5 6.2l2.3 2.3 4.7-5" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>', warn: '<svg viewBox="0 0 12 12"><circle cx="6" cy="6" r="4.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M6 3.5v3" stroke="currentColor" stroke-width="1.6"/><circle cx="6" cy="8.6" r=".9" fill="currentColor"/></svg>', crit: '<svg viewBox="0 0 12 12"><path d="M6 1.5l5 9H1z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M6 5v2.4" stroke="currentColor" stroke-width="1.5"/><circle cx="6" cy="9" r=".8" fill="currentColor"/></svg>' };
+const disBand = v => v <= 33 ? ['good', 'Low'] : v <= 66 ? ['warn', 'Moderate'] : ['crit', 'High'];
+const disChip = v => { const [c, l] = disBand(v); return `<span class="chip c-${c}">${ICON[c]}${l}</span>`; };
+const chip = v => { const [c, l] = band(v); return `<span class="chip c-${c}">${ICON[c]}${l}</span>`; };
+const mom = s => r1(last(s.thrive) - s.thrive[NW - 5]);
+const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const pctl = (s, k) => { const peers = STUDENTS.filter(x => x.year === s.year); const v = k ? last(s.thriveD[k]) : last(s.thrive); return Math.round(100 * peers.filter(x => (k ? last(x.thriveD[k]) : last(x.thrive)) < v).length / (peers.length - 1)); };
+const avgA = a => a.reduce((x, y) => x + y, 0) / a.length;
+const grade = z => z > 1 ? 'A' : z > .3 ? 'B' : z > -.5 ? 'C' : z > -1.2 ? 'D' : 'E';
+const first = s => s.name.split(' ')[0];
+const sgn = v => (v > 0 ? '+' : v < 0 ? '\u2212' : '') + Math.abs(v);
+
+function signals(s) {
+  const out = [], f = first(s);
+  const att = s.win[3][1];
+  if (att < 90) out.push({ sev: att < 85 ? 'crit' : 'warn', d: 'Attendance', t: `Term attendance at ${att}%`, e: `Below the 90% goal; ${s.wkAbs.reduce((a, b) => a + b, 0)} concerning absences this term${s.wkAbs[0] + s.wkAbs[4] > s.wkAbs.reduce((a, b) => a + b, 0) * .55 ? ', clustered on Mondays and Fridays' : ''}.`, a: 'Call home to understand the pattern before it sets.', q: `What makes the start or end of the week harder for you, ${f}?` });
+  const dv = last(s.dis);
+  if (dv > 33) { const top = [...s.disC].sort((a, b) => b.wt * b.v - a.wt * a.v).slice(0, 2).map(c => c.n.toLowerCase()); out.push({ sev: dv > 66 ? 'crit' : 'warn', d: 'Disengagement', t: `${disBand(dv)[1]} disengagement pattern (${Math.round(dv)})`, e: `Driven mostly by ${top[0]} and ${top[1]}; ${s.minsLost} minutes lost to lateness this term, most often in ${s.disSubj}.`, a: `Check the lateness pattern in ${s.disSubj} with the class teacher.`, q: 'When you are late to class, what is usually happening just before?' }); }
+  const gaps = s.subjects.map(x => ({ n: x.n, g: r1(x.ab - last(x.z)) })).filter(x => x.g >= .5).sort((a, b) => b.g - a.g);
+  if (gaps.length) out.push({ sev: gaps[0].g > 1 ? 'crit' : 'warn', d: 'Academic', t: `Working below ability in ${gaps.slice(0, 2).map(x => x.n).join(' and ')}`, e: `Results sit ${gaps[0].g} standard deviations under his Allwell-predicted level in ${gaps[0].n}.`, a: `Ask the ${gaps[0].n} teacher what is getting in the way: effort, skills or confidence.`, q: `Which part of ${gaps[0].n} feels hardest right now?` });
+  const nT = s.neg.slice(-4).reduce((a, b) => a + b, 0), nP = s.neg.slice(-8, -4).reduce((a, b) => a + b, 0);
+  if (nT >= 3 && nT > nP) out.push({ sev: nT >= 6 ? 'crit' : 'warn', d: 'Behaviour', t: 'Negative entries rising', e: `${nT} negative entries in the last four weeks, up from ${nP} in the four before.`, a: 'Look for a common setting or class in the conduct log.', q: 'Is there a class or time of day where things tend to go wrong?' });
+  const lg = last(s.lex) - s.lex[NW - 9];
+  if (lg < 20) out.push({ sev: 'warn', d: 'Literacy', t: 'Reading growth has stalled', e: `Lexile up only ${lg}L over eight weeks against a cohort gain of about 27L.`, a: 'Check book choice and quiz habits with the English teacher.', q: 'What are you reading at the moment, and is it the right challenge?' });
+  { const co = s.lateEv.filter(e => e.w >= 10 && e.kind === 'co'), all = s.lateEv.filter(e => e.w >= 10 && e.kind !== 'school'); const coM = co.reduce((a, e) => a + e.mins, 0);
+    if (co.length >= 4 && coM >= 60) { const byA = {}; co.forEach(e => byA[e.act] = (byA[e.act] || 0) + 1); const ta = Object.keys(byA).sort((a, b) => byA[b] - byA[a])[0], ex = co.find(e => e.act === ta);
+      out.push({ sev: coM >= 150 ? 'crit' : 'warn', d: 'Attendance', t: 'Co-curricular is costing class time', e: `${co.length} of ${all.length} late-to-class arrivals this term were co-curricular (${coM} minutes), mostly ${ta} before ${ex.per} ${ex.subj}.`, a: `Agree a finish time with the ${ta} staff, or a catch-up routine for ${ex.subj}.`, q: `How do you catch up in ${ex.subj} when ${ta} runs late?` }); } }
+  if (!s.acts.length) out.push({ sev: 'warn', d: 'Co-curricular', t: 'No co-curricular involvement recorded', e: 'No sport, arts, service or club activity in Terms 2–3.', a: 'Explore one activity linked to an interest he names.', q: 'If you could join one thing at school next term, what would it be?' });
+  if (last(s.ext) >= 70) out.push({ sev: 'good', d: 'Extension', t: 'Ready for stretch', e: `Extension potential ${Math.round(last(s.ext))}/100, top ${100 - pctl(s, null) < 25 ? 'quarter' : 'half'} of Year ${s.year} for overall thriving.`, a: 'Nominate for an enrichment program or competition.', q: 'What topic would you love to go deeper on?' });
+  const best = DOMAINS.map(d => ({ n: d.n, v: last(s.thriveD[d.k]) - s.thriveD[d.k][NW - 5] })).sort((a, b) => b.v - a.v)[0];
+  if (best.v > 5) out.push({ sev: 'good', d: best.n, t: `${best.n} improving`, e: `Up ${Math.round(best.v)} points in four weeks.`, a: 'Name the progress with him; it reinforces what is working.', q: `What have you changed that is making ${best.n.toLowerCase()} go better?` });
+  return out;
+}
+
+/* ---------- tooltip & chart helpers ---------- */
+const tip = document.getElementById('tip');
+const showTip = (e, html) => { tip.innerHTML = html; tip.style.opacity = 1; const w = tip.offsetWidth, h = tip.offsetHeight; let x = e.clientX + 14, y = e.clientY - h - 10; if (x + w > innerWidth - 8) x = e.clientX - w - 14; if (y < 8) y = e.clientY + 16; tip.style.left = x + 'px'; tip.style.top = y + 'px'; };
+const hideTip = () => tip.style.opacity = 0;
+let observers = [];
+function fig(el, draw) { const svg = el.querySelector('svg'); const run = () => { const W = svg.clientWidth, H = svg.clientHeight; if (W > 0) draw(svg, W, H); }; const ro = new ResizeObserver(run); ro.observe(svg); observers.push(ro); }
+const ticks = (lo, hi, n) => { const step = Math.pow(10, Math.floor(Math.log10((hi - lo) / n))); const m = [1, 2, 2.5, 5, 10].find(m => (hi - lo) / (step * m) <= n) * step; const out = []; for (let v = Math.ceil(lo / m) * m; v <= hi + 1e-9; v += m) out.push(+v.toFixed(6)); return out; };
+
+function lineChart(el, o) {
+  fig(el, (svg, W, H) => {
+    const narrow = W < 520, labd = o.series.filter(s => o.series.length <= 3 || s.lab), endL = !narrow && labd.length > 0 && o.endLabels !== false;
+    const m = { l: 40, r: endL ? 96 : 12, t: 12, b: 26 }, iw = W - m.l - m.r, ih = H - m.t - m.b, n = o.x.length;
+    const X = i => m.l + (n === 1 ? iw / 2 : i / (n - 1) * iw), Y = v => m.t + ih - (v - o.y[0]) / (o.y[1] - o.y[0]) * ih;
+    let g = '';
+    ticks(o.y[0], o.y[1], narrow ? 3 : 5).forEach(v => { g += `<line x1="${m.l}" x2="${W - m.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)"/><text x="${m.l - 8}" y="${Y(v) + 4}" text-anchor="end">${o.fmt ? o.fmt(v) : v}</text>`; });
+    const every = Math.ceil(n / Math.max(2, Math.floor(iw / (narrow ? 70 : 64))));
+    o.x.forEach((l, i) => { if (i % every === 0 || i === n - 1 && (n - 1) % every > every / 2) g += `<text x="${X(i)}" y="${H - 6}" text-anchor="middle">${narrow ? l.replace(' W', '.') : l}</text>`; });
+    (o.refs || []).forEach(r => { g += `<line x1="${m.l}" x2="${W - m.r}" y1="${Y(r.v)}" y2="${Y(r.v)}" stroke="var(--ink2)" stroke-dasharray="2 3"/>`; });
+    if (o.band) { const top = o.band.hi.map((v, i) => `${X(i)},${Y(v)}`), bot = o.band.lo.map((v, i) => `${X(i)},${Y(v)}`).reverse(); g += `<polygon points="${top.concat(bot).join(' ')}" fill="var(--gray)" opacity=".28"/>`; }
+    o.series.forEach((s, si) => {
+      const pts = s.v.map((v, i) => `${X(i)},${Y(v)}`).join(' ');
+      if (s.area) g += `<polygon class="grow" points="${X(0)},${Y(o.y[0])} ${pts} ${X(n - 1)},${Y(o.y[0])}" fill="${s.c}" opacity=".16"/>`;
+      g += `<polyline ${s.area ? 'class="grow"' : ''} points="${pts}" fill="none" stroke="${s.c}" stroke-width="${s.w || 2}" stroke-linejoin="round" stroke-linecap="round" ${s.dash ? `stroke-dasharray="${s.dash}"` : ''}/>`;
+    });
+    if (endL) { const ys = labd.map(s => ({ s, y: Y(last(s.v)) })).sort((a, b) => a.y - b.y); for (let k = 1; k < ys.length; k++) if (ys[k].y - ys[k - 1].y < 16) ys[k].y = ys[k - 1].y + 16; ys.forEach(({ s, y }) => { g += `<text x="${W - m.r + 8}" y="${y + 4}" class="lbl">${s.n}${s.lastLab ? ' ' + s.lastLab : ''}</text>`; }); }
+    const hl = o.series[0]; if (hl.dotLast) g += `<circle cx="${X(n - 1)}" cy="${Y(last(hl.v))}" r="5" fill="${hl.c}" stroke="var(--bg)" stroke-width="2"/>`;
+    g += `<g class="hov" style="display:none"><line y1="${m.t}" y2="${m.t + ih}" stroke="var(--ink3)"/>${o.series.map(s => `<circle r="4" fill="${s.c}" stroke="var(--bg)" stroke-width="2"/>`).join('')}</g><rect x="${m.l}" y="${m.t}" width="${iw}" height="${ih}" fill="transparent"/>`;
+    svg.innerHTML = g;
+    const hov = svg.querySelector('.hov'), rect = svg.querySelector('rect:last-of-type');
+    rect.onmousemove = e => { const bx = svg.getBoundingClientRect(); const i = clamp(Math.round((e.clientX - bx.left - m.l) / iw * (n - 1)), 0, n - 1); hov.style.display = ''; hov.querySelector('line').setAttribute('x1', X(i)); hov.querySelector('line').setAttribute('x2', X(i)); hov.querySelectorAll('circle').forEach((c, k) => { c.setAttribute('cx', X(i)); c.setAttribute('cy', Y(o.series[k].v[i])); }); showTip(e, `<b>${o.xFull ? o.xFull[i] : o.x[i]}</b>` + o.series.map(s => `<br>${s.n}: ${o.fmt ? o.fmt(s.v[i], true) : s.v[i]}`).join('') + (o.band ? `<br>${o.band.n}: ${o.band.lo[i]}–${o.band.hi[i]}` : '')); };
+    rect.onmouseleave = () => { hov.style.display = 'none'; hideTip(); };
+  });
+}
+
+function scatter(el, o) {
+  fig(el, (svg, W, H) => {
+    const narrow = W < 520, m = { l: 42, r: 16, t: 14, b: 34 }, iw = W - m.l - m.r, ih = H - m.t - m.b;
+    const X = v => m.l + (v - o.x[0]) / (o.x[1] - o.x[0]) * iw, Y = v => m.t + ih - (v - o.y[0]) / (o.y[1] - o.y[0]) * ih;
+    let g = '';
+    ticks(o.x[0], o.x[1], narrow ? 4 : 6).forEach(v => g += `<line x1="${X(v)}" x2="${X(v)}" y1="${m.t}" y2="${m.t + ih}" stroke="var(--line)"/><text x="${X(v)}" y="${m.t + ih + 16}" text-anchor="middle">${o.fx ? o.fx(v) : v}</text>`);
+    ticks(o.y[0], o.y[1], narrow ? 4 : 5).forEach(v => g += `<line x1="${m.l}" x2="${m.l + iw}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)"/><text x="${m.l - 8}" y="${Y(v) + 4}" text-anchor="end">${o.fy ? o.fy(v) : v}</text>`);
+    if (o.diag) g += `<line x1="${X(Math.max(o.x[0], o.y[0]))}" y1="${Y(Math.max(o.x[0], o.y[0]))}" x2="${X(Math.min(o.x[1], o.y[1]))}" y2="${Y(Math.min(o.x[1], o.y[1]))}" stroke="var(--ink3)" stroke-dasharray="4 4"/>`;
+    if (o.cross) g += `<line x1="${X(o.cross[0])}" x2="${X(o.cross[0])}" y1="${m.t}" y2="${m.t + ih}" stroke="var(--ink3)"/><line x1="${m.l}" x2="${m.l + iw}" y1="${Y(o.cross[1])}" y2="${Y(o.cross[1])}" stroke="var(--ink3)"/>`;
+    (o.corners || []).forEach(([t, pos]) => { const x = pos.includes('r') ? m.l + iw - 6 : m.l + 6, y = pos.includes('t') ? m.t + 14 : m.t + ih - 8; g += `<text x="${x}" y="${y}" text-anchor="${pos.includes('r') ? 'end' : 'start'}" style="font-weight:600">${t}</text>`; });
+    g += `<text x="${m.l + iw}" y="${H - 2}" text-anchor="end">${o.xl}</text>`;
+    const pts = o.pts.map(p => ({ ...p, cx: X(p.x), cy: Y(p.y) }));
+    pts.filter(p => !p.hl).forEach(p => g += `<circle cx="${p.cx}" cy="${p.cy}" r="${p.r || 5}" fill="${p.c}" stroke="var(--bg)" stroke-width="2" ${o.click ? 'style="cursor:pointer"' : ''}/>`);
+    pts.filter(p => p.hl).forEach(p => g += `<circle cx="${p.cx}" cy="${p.cy}" r="${p.r || 8}" fill="${p.c}" stroke="var(--bg)" stroke-width="2"/>`);
+    const labs = pts.filter(p => p.lab).map(p => ({ p, right: p.cx < m.l + iw - 120, ly: p.cy + 4 })).sort((a, b) => a.ly - b.ly);
+    [true, false].forEach(side => { const grp = labs.filter(l => l.right === side); for (let k = 1; k < grp.length; k++) if (grp[k].ly - grp[k - 1].ly < 15) grp[k].ly = grp[k - 1].ly + 15; });
+    labs.forEach(({ p, right, ly }) => { const tx = p.cx + (right ? 12 : -12); if (Math.abs(ly - 4 - p.cy) > 3) g += `<line x1="${p.cx + (right ? 6 : -6)}" y1="${p.cy}" x2="${tx + (right ? -2 : 2)}" y2="${ly - 4}" stroke="var(--ink3)" stroke-width="1"/>`; g += `<text x="${tx}" y="${ly}" text-anchor="${right ? 'start' : 'end'}" class="lbl" style="font-weight:${p.hl ? 700 : 500}">${narrow && !p.hl ? p.lab.slice(0, 12) : p.lab}</text>`; });
+    g += `<rect x="${m.l}" y="${m.t}" width="${iw}" height="${ih}" fill="transparent"/>`;
+    svg.innerHTML = g;
+    const rect = svg.querySelector('rect:last-of-type');
+    const near = e => { const bx = svg.getBoundingClientRect(), mx = e.clientX - bx.left, my = e.clientY - bx.top; let best = null, bd = 400; pts.forEach(p => { const d = (p.cx - mx) ** 2 + (p.cy - my) ** 2; if (d < bd) { bd = d; best = p; } }); return best; };
+    rect.onmousemove = e => { const p = near(e); if (p) { showTip(e, p.tip); rect.style.cursor = o.click ? 'pointer' : 'default'; } else { hideTip(); rect.style.cursor = 'default'; } };
+    rect.onmouseleave = hideTip;
+    if (o.click) rect.onclick = e => { const p = near(e); if (p) { hideTip(); o.click(p); } };
+  });
+}
+
+function divCols(el, pos, neg, labels) {
+  fig(el, (svg, W, H) => {
+    const narrow = W < 520, m = { l: 30, r: 8, t: 14, b: 26 }, iw = W - m.l - m.r, ih = H - m.t - m.b, n = pos.length;
+    const mx = Math.max(4, ...pos, ...neg), mid = m.t + ih * mx / (2 * mx), sc = (ih / 2) / mx, bw = iw / n, w = Math.max(3, bw - 4);
+    let g = `<line x1="${m.l}" x2="${W - m.r}" y1="${mid}" y2="${mid}" stroke="var(--ink3)"/><text x="${m.l - 6}" y="${m.t + 8}" text-anchor="end">+${mx}</text><text x="${m.l - 6}" y="${m.t + ih}" text-anchor="end">−${mx}</text>`;
+    pos.forEach((p, i) => { const x = m.l + i * bw + 2; if (p) g += `<path d="M${x},${mid - 1} v${-(p * sc - 4)} a4,4 0 0 1 4,-4 h${w - 8} a4,4 0 0 1 4,4 v${p * sc - 4}z" fill="var(--s1)"/>`; if (neg[i]) g += `<path d="M${x},${mid + 1} v${neg[i] * sc - 4} a4,4 0 0 0 4,4 h${w - 8} a4,4 0 0 0 4,-4 v${-(neg[i] * sc - 4)}z" fill="var(--s2)"/>`; });
+    const every = narrow ? 4 : 2; labels.forEach((l, i) => { if (i % every === 0) g += `<text x="${m.l + i * bw + bw / 2}" y="${H - 6}" text-anchor="middle">${narrow ? l.replace(' W', '.') : l}</text>`; });
+    g += `<rect x="${m.l}" y="${m.t}" width="${iw}" height="${ih}" fill="transparent"/>`;
+    svg.innerHTML = g;
+    const rect = svg.querySelector('rect:last-of-type');
+    rect.onmousemove = e => { const bx = svg.getBoundingClientRect(); const i = clamp(Math.floor((e.clientX - bx.left - m.l) / bw), 0, n - 1); showTip(e, `<b>${labels[i]}</b><br>Positive: ${pos[i]}<br>Negative: ${neg[i]}`); };
+    rect.onmouseleave = hideTip;
+  });
+}
+
+function stackCols(el, labels, series) {
+  fig(el, (svg, W, H) => {
+    const narrow = W < 520, m = { l: 28, r: 8, t: 10, b: 26 }, iw = W - m.l - m.r, ih = H - m.t - m.b, n = labels.length;
+    const tot = labels.map((_, i) => series.reduce((a, s) => a + s.v[i], 0)), mx = Math.max(4, ...tot), Y = v => m.t + ih - v / mx * ih, bw = iw / n, w = Math.max(4, bw - 6);
+    let g = ''; ticks(0, mx, 3).forEach(v => g += `<line x1="${m.l}" x2="${W - m.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)"/><text x="${m.l - 6}" y="${Y(v) + 4}" text-anchor="end">${v}</text>`);
+    labels.forEach((l, i) => { let acc = 0; const x = m.l + i * bw + 3; const segs = series.map(s => ({ s, v: s.v[i] })).filter(o => o.v > 0);
+      segs.forEach((o, k) => { const y0 = Y(acc), y1 = Y(acc + o.v), top = k === segs.length - 1, h = Math.max(1, y0 - y1 - 2); g += top ? `<path d="M${x},${y0 - 1} v${-(h - 3)} a3,3 0 0 1 3,-3 h${w - 6} a3,3 0 0 1 3,3 v${h - 3}z" fill="${o.s.c}"/>` : `<rect x="${x}" y="${y1 + 1}" width="${w}" height="${h}" fill="${o.s.c}"/>`; acc += o.v; });
+      if (i % (narrow ? 4 : 2) === 0) g += `<text x="${x + w / 2}" y="${H - 6}" text-anchor="middle">${narrow ? l.replace(' W', '.') : l}</text>`; });
+    g += `<rect x="${m.l}" y="${m.t}" width="${iw}" height="${ih}" fill="transparent"/>`; svg.innerHTML = g;
+    const rect = svg.querySelector('rect:last-of-type');
+    rect.onmousemove = e => { const bx = svg.getBoundingClientRect(); const i = clamp(Math.floor((e.clientX - bx.left - m.l) / bw), 0, n - 1); showTip(e, `<b>${labels[i]}</b>` + series.map(s => `<br>${s.n}: ${s.v[i]}`).join('')); };
+    rect.onmouseleave = hideTip;
+  });
+}
+const sparkSvg = (vals, col) => { const lo = Math.min(...vals), hi = Math.max(...vals), sp = Math.max(hi - lo, 8); const pts = vals.map((v, i) => `${(i / (vals.length - 1) * 100).toFixed(1)},${(26 - (v - lo) / sp * 22 - 2).toFixed(1)}`).join(' '); return `<svg class="spark" viewBox="0 0 100 26" preserveAspectRatio="none" aria-hidden="true"><polyline points="${pts}" fill="none" stroke="${col}" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>`; };
+const barRows = (items, o = {}) => items.map(it => `<div class="brow" data-tip="${esc(it.tip || '')}"><span>${esc(it.l)}</span><div class="btrack"><i style="width:${clamp((it.v - (o.min || 0)) / ((o.max || 100) - (o.min || 0)) * 100, 0, 100)}%;background:${it.c || 'var(--s1)'}"></i>${o.mark != null ? `<span class="mk" style="left:${(o.mark - (o.min || 0)) / ((o.max || 100) - (o.min || 0)) * 100}%"></span>` : ''}</div><span class="num">${it.t ?? it.v}</span></div>`).join('');
+const bindRowTips = root => root.querySelectorAll('[data-tip]').forEach(el => { if (!el.dataset.tip) return; el.onmousemove = e => showTip(e, el.dataset.tip); el.onmouseleave = hideTip; });
+const heatCol = (v, lo, hi) => `color-mix(in oklab, var(--s1) ${Math.round(clamp((v - lo) / (hi - lo), 0, 1) * 70 + 8)}%, var(--bg))`;
+const inkFor = (v, lo, hi) => (v - lo) / (hi - lo) > .62 ? '#fff' : 'var(--ink)';
+
+/* ---------- state ---------- */
+const VIEWS = [['pulse', 'Pulse'], ['learning', 'Learning'], ['attendance', 'Attendance'], ['wellbeing', 'Wellbeing'], ['growth', 'Growth'], ['support', 'Learning support'], ['cohort', 'Year group']];
+const mix = x => new Set(DOMAINS.map(d => band(last(x.thriveD[d.k]))[0]).concat(disBand(last(x.dis))[0])).size * 10 + signals(x).length + (x.plan ? 5 : 0);
+let cur = [...STUDENTS].sort((a, b) => mix(b) - mix(a))[0], view = 'pulse', termIx = 3;
+try { const sv = localStorage.getItem('lumen-student'); if (sv && STUDENTS[+sv]) cur = STUDENTS[+sv]; } catch (e) {}
+
+document.getElementById('tabs').innerHTML = VIEWS.map(([k, n]) => `<button class="tab" id="tab-${k}" data-v="${k}">${n}</button>`).join('');
+document.getElementById('tabs').onclick = e => { const b = e.target.closest('.tab'); if (b) location.hash = b.dataset.v; };
+
+function renderIdent(s) {
+  const tags = [s.boarder && 'Boarder', s.eald && 'EAL/D', s.intl && 'International', s.dl && 'Diverse learning', s.fn && 'First Nations'].filter(Boolean);
+  const t = Math.round(last(s.thrive)), mm = mom(s);
+  document.getElementById('ident').innerHTML = `<div class="av" aria-hidden="true">${s.name.split(' ').map(x => x[0]).join('')}</div>
+  <div><h2>${esc(s.name)}</h2><div class="meta">Year ${s.year} &middot; ${s.house} House &middot; Mentor ${s.mentor} &middot; ${s.code}</div>${tags.length ? `<div class="tags">${tags.map(x => `<span class="tag">${x}</span>`).join('')}</div>` : ''}</div>
+  <div class="thrive"><div class="n">${t}</div><div class="l">Thrive score ${chip(t)}</div><div class="l"><span class="${mm >= 0 ? 'up' : 'down'}">${mm >= 0 ? '▲' : '▼'} ${Math.abs(mm)}</span> over 4 weeks</div></div>`;
+  document.getElementById('pickname').textContent = s.name; document.getElementById('pickyr').textContent = 'Year ' + s.year;
+}
+
+/* ---------- views ---------- */
+function vPulse(s) {
+  const t = Math.round(last(s.thrive)), mm = mom(s), sig = signals(s), f = first(s);
+  const weakest = DOMAINS.map(d => ({ n: d.n, v: last(s.thriveD[d.k]) })).sort((a, b) => a.v - b.v)[0];
+  const head = t >= 67 ? (mm >= 0 ? `${f} is thriving and still rising` : `${f} is thriving, but has dipped ${Math.abs(mm)} points this month`) : t >= 34 ? (mm >= 0 ? `${f} is recovering; ${weakest.n.toLowerCase()} is the drag` : `${f} is slipping, led by ${weakest.n.toLowerCase()}`) : `${f} needs a plan now, starting with ${weakest.n.toLowerCase()}`;
+  const peers = STUDENTS.filter(x => x.year === s.year);
+  const ms = sig.find(x => x.sev !== 'good') || sig[0];
+  const strengths = DOMAINS.map(d => ({ n: d.n, v: last(s.thriveD[d.k]) })).sort((a, b) => b.v - a.v).slice(0, 2);
+  const events = [...s.conduct.slice(0, 3).map(c => ({ d: c.d, t: c.h, c: c.pos ? 'var(--s1)' : 'var(--s2)' })), ...s.comps.slice(0, 1).map(c => ({ d: new Date(2026, 7, 21), t: `${c.r}, ${c.c}`, c: 'var(--s3)' })), ...(s.plan ? [{ d: last(s.plan.log).d, t: 'Support plan reviewed with family', c: 'var(--s3)' }] : []), ...s.absLog.filter(a => !a.ok).slice(0, 2).map(a => ({ d: a.d, t: `Unexplained absence, ${a.subj}`, c: 'var(--s2)' }))].sort((a, b) => b.d - a.d).slice(0, 6);
+  return `<div class="vh"><div><h1>${head}</h1><p>Thrive combines six domains, weighted toward academic progress and attendance. 100 is flourishing; under 34 needs action.</p></div></div>
+  <div class="grid g21">
+    <div class="card"><h3>Thrive score, Terms 2–3</h3><p class="sub">Weekly, against the Year ${s.year} median. Dotted lines mark 67 (on track) and 34 (act now).</p>
+      <div class="legend"><span><i style="background:var(--s1)"></i>${esc(f)}</span><span><i class="dash"></i>Year ${s.year} median</span></div>
+      <div class="fig" id="f-thrive" style="min-height:400px"><svg></svg></div></div>
+    <div class="card"><h3>Domain pulse</h3><p class="sub">Band now, 20-week trend, change over 4 weeks</p>
+      ${DOMAINS.map(d => { const v = last(s.thriveD[d.k]), dv = Math.round(v - s.thriveD[d.k][NW - 5]), c = `var(--${band(v)[0]})`; return `<div class="pr2" data-tip="${esc(`<b>${d.n}</b><br>Score ${Math.round(v)} &middot; ${band(v)[1]}<br>Ahead of ${pctl(s, d.k)}% of Year ${s.year}`)}"><div class="ptop"><span class="nm">${d.n}</span>${chip(v)}</div><div class="pbot"><div class="track"><i style="width:${v}%;background:${c}"></i></div><span class="num" style="color:${c}">${Math.round(v)}</span><span class="sp">${sparkSvg(s.thriveD[d.k], c)}</span><span class="num ${dv >= 0 ? 'up' : 'down'}" style="font-size:13px">${sgn(dv)}</span></div></div>`; }).join('')}
+      ${(() => { const v = last(s.dis), dd = Math.round(v - s.dis[NW - 5]), c = `var(--${disBand(v)[0]})`; return `<p class="riskcap">Risk measure, lower is better. Not part of Thrive.</p><div class="pr2" style="border-top:0" data-tip="${esc(`<b>Disengagement pattern</b><br>Score ${Math.round(v)} &middot; ${disBand(v)[1]}<br>Lateness, volume, concentration and minutes lost`)}"><div class="ptop"><span class="nm">Disengagement</span>${disChip(v)}</div><div class="pbot"><div class="track"><i style="width:${v}%;background:${c}"></i></div><span class="num" style="color:${c}">${Math.round(v)}</span><span class="sp">${sparkSvg(s.dis, c)}</span><span class="num ${dd <= 0 ? 'up' : 'down'}" style="font-size:13px">${sgn(dd)}</span></div></div>`; })()}
+    </div>
+  </div>
+  <div class="grid g111" style="margin-top:16px">
+    <div class="card"><h3>What Lumen noticed</h3><p class="sub">${sig.length} signals from this week’s data</p>
+      ${sig.length ? sig.slice(0, 4).map(x => `<div class="sig"><span class="c-${x.sev}" style="background:none">${ICON[x.sev]}</span><div><b>${esc(x.t)}</b><p>${esc(x.e)}</p><p class="act">${esc(x.a)}</p></div></div>`).join('') : '<div class="empty">Nothing unusual this week.</div>'}
+    </div>
+    <div class="card tint"><h3>Next mentor conversation</h3><p class="sub">Drafted from the signals; adapt in your own words</p>
+      <b style="font-size:14px">Start with what’s going well</b><p style="margin:2px 0 10px;font-size:14px;color:var(--ink2)">${strengths.map(x => `${x.n} (${Math.round(x.v)})`).join(' and ')} ${strengths[0].v >= 67 ? 'are real strengths' : 'are his strongest areas'}.</p>
+      <b style="font-size:14px">Questions to ask</b><ol class="qlist">${sig.slice(0, 3).map(x => `<li>${esc(x.q)}</li>`).join('') || '<li>What are you most proud of this term?</li>'}</ol>
+      ${ms ? `<b style="font-size:14px">One action to agree</b><p style="margin:2px 0 0;font-size:14px;color:var(--ink2)">${esc(ms.a)}</p>` : ''}
+    </div>
+    <div class="card"><h3>Recent journey</h3><p class="sub">Latest recorded events</p>
+      <ul class="tl">${events.map(e => `<li><time>${fmtD(e.d)}</time><span class="dot" style="background:${e.c}"></span><span>${esc(e.t)}</span></li>`).join('') || '<li>No recent events</li>'}</ul></div>
+  </div>
+  <div class="card" style="margin-top:16px"><h3>Where ${esc(f)} sits in Year ${s.year}</h3><p class="sub">Each dot is a Year ${s.year} student; ${esc(f)} is the large dot. Right is stronger.</p>
+    ${[{ k: null, n: 'Thrive' }, ...DOMAINS].map(d => { const vals = peers.map(p => ({ p, v: d.k ? last(p.thriveD[d.k]) : last(p.thrive) })); return `<div class="srow"><span style="font-weight:${d.k ? 500 : 700}">${d.n}</span><div class="strip">${vals.map(({ p, v }) => `<span class="dt${p === s ? ' me' : ''}" style="left:${v}%" data-tip="${esc(`<b>${p === s ? p.name : 'Year ' + s.year + ' peer'}</b><br>${d.n}: ${Math.round(v)}`)}"></span>`).join('')}</div><span class="num" style="font-size:13px;font-weight:500;color:var(--ink2)">ahead of ${pctl(s, d.k)}%</span></div>`; }).join('')}
+  </div>`;
+}
+function afterPulse(s) {
+  const peers = STUDENTS.filter(x => x.year === s.year);
+  const med = WL.map((_, w) => { const a = peers.map(p => p.thrive[w]).sort((x, y) => x - y); return r1((a[5] + a[6]) / 2); });
+  lineChart(document.getElementById('f-thrive'), { x: WL, xFull: WEEKS.map(w => `${w.lab}, ${fmtD(w.d)}`), y: [0, 100], refs: [{ v: 67, l: 'On track' }, { v: 34, l: 'Act now' }], series: [{ n: first(s), v: s.thrive.map(r1), c: 'var(--s1)', w: 2.5, area: true, dotLast: true, lastLab: Math.round(last(s.thrive)) }, { n: 'Median', v: med, c: 'var(--ink3)', dash: '4 4', w: 1.5 }], fmt: (v, t) => t ? Math.round(v) : v });
+}
+
+function vLearning(s) {
+  const T = TERMS[termIx], f = first(s);
+  const gaps = s.subjects.map(x => ({ n: x.n, g: r1(x.z[termIx] - x.ab) })).sort((a, b) => a.g - b.g);
+  const under = gaps.filter(x => x.g <= -.5);
+  const head = under.length ? `${f} is working below his ability in ${under.length} subject${under.length > 1 ? 's' : ''}` : `${f} is performing at or above his ability in every subject`;
+  const ch = s.subjects.map(x => ({ n: x.n, d: x.z[3] - x.z[0] })).sort((a, b) => b.d - a.d);
+  const best = ch[0], worst = last(ch);
+  const comments = s.subjects.slice(0, 4).map(x => { const g = grade(x.z[termIx]); return { n: x.n, g, t: g <= 'B' ? `${f} engages confidently and his work shows real depth. Next step: ${pick(rng(x.n.length + termIx), ['extend his written explanations', 'attempt the extension tasks', 'lead group discussions'])}.` : g === 'C' ? `${f} is building sound understanding. More consistent homework would lift his results.` : `${f} finds parts of this course challenging. Regular help sessions and asking questions in class are recommended.` }; });
+  return `<div class="vh"><div><h1>${head}</h1><p>Ability is his Allwell result mapped to each subject; performance is his z-score against the cohort. A gap of 0.5 or more is worth a conversation.</p></div>
+    <div class="seg" role="group" aria-label="Term">${TERMS.map((t, k) => `<button data-term="${k}" class="${k === termIx ? 'on' : ''}">${t}</button>`).join('')}</div></div>
+  <div class="grid g11">
+    <div class="card"><h3>Ability vs performance, ${T}</h3><p class="sub">Ability across, performance up. Above the diagonal: outperforming ability.</p><div class="fig tall" id="f-quad"><svg></svg></div></div>
+    <div class="card"><h3>Gap to ability, ${T}</h3><p class="sub">Performance minus ability, in standard deviations</p>
+      <div class="legend"><span><i class="box" style="background:var(--s1);opacity:1"></i>Above ability</span><span><i class="box" style="background:var(--s2);opacity:1"></i>Below ability</span></div>
+      ${gaps.map(x => { const w = Math.min(50, Math.abs(x.g) / 2 * 50); return `<div class="brow" data-tip="${esc(`<b>${x.n}</b><br>Gap ${x.g > 0 ? '+' : ''}${x.g}`)}"><span>${x.n}</span><div class="btrack" style="background:none"><span class="mk" style="left:50%;background:var(--ink3);width:1px"></span><i style="left:${x.g < 0 ? 50 - w : 50}%;width:${w}%;background:${x.g < 0 ? 'var(--s2)' : 'var(--s1)'};border-radius:${x.g < 0 ? '4px 0 0 4px' : '0 4px 4px 0'}"></i></div><span class="num">${sgn(x.g)}</span></div>`; }).join('')}
+    </div>
+  </div>
+  ${allwellHtml(s)}
+  <div class="grid g21" style="margin-top:16px">
+    <div class="card"><h3>Biggest mover: ${best.n} ${best.d >= 0 ? 'up' : 'down'} ${Math.abs(r1(best.d))}</h3><p class="sub">Z-score by term. ${best.n} and ${worst.n} highlighted.</p>
+      <div class="legend"><span><i style="background:var(--s1)"></i>${best.n}</span><span><i style="background:var(--s2)"></i>${worst.n}</span><span><i style="background:var(--gray)"></i>Other subjects</span></div>
+      <div class="fig tall" id="f-ztrend"><svg></svg></div></div>
+    <div class="card"><h3>Grades by term</h3><p class="sub">Darker is stronger</p><div class="scroll"><table class="heat"><thead><tr><th>Subject</th>${TERMS.map(t => `<th style="text-align:center">${t.replace(' 20', ' ’')}</th>`).join('')}</tr></thead><tbody>
+      ${s.subjects.map(x => `<tr><td>${x.n}</td>${x.z.map(z => { const v = 'EDCBA'.indexOf(grade(z)); return `<td class="h" style="background:${heatCol(v, 0, 4)};color:${inkFor(v, 0, 4)}">${grade(z)}</td>`; }).join('')}</tr>`).join('')}</tbody></table></div></div>
+  </div>
+  <div class="grid g11" style="margin-top:16px">
+    <div class="card"><h3>Learning dispositions vs cohort</h3><p class="sub">Average teacher rating, 1 to 5, Term 3</p>
+      <div class="legend"><span><i class="box" style="background:var(--s1);opacity:1;border-radius:50%;width:10px"></i>${esc(f)}</span><span><i class="box" style="background:var(--gray);opacity:1;border-radius:50%;width:10px"></i>Year ${s.year} average</span></div>
+      ${s.lp.map(x => { const a = (x.me - 1) / 4 * 100, b = (x.co - 1) / 4 * 100; return `<div class="db" data-tip="${esc(`<b>${x.item}</b><br>${f}: ${x.me}<br>Year ${s.year}: ${x.co}`)}"><span>${x.item}</span><div class="dbt"><span class="ln" style="left:${Math.min(a, b)}%;width:${Math.abs(a - b)}%"></span><span class="b" style="left:${b}%"></span><span class="a" style="left:${a}%"></span></div><span class="num ${x.me >= x.co ? 'up' : 'down'}">${x.me >= x.co ? '+' : '−'}${Math.abs(r1(x.me - x.co))}</span></div>`; }).join('')}
+    </div>
+    <div class="card"><h3>Teacher voice, ${T}</h3><p class="sub">Report comments</p>${comments.map(c => `<div class="quote"><b style="color:var(--ink)">${c.n} &middot; ${c.g}</b><br>${esc(c.t)}</div>`).join('')}</div>
+  </div>`;
+}
+function allwellHtml(s) {
+  const f = first(s), stan = p => [4, 11, 23, 40, 60, 77, 89, 96].filter(t => p >= t).length + 1;
+  const sorted = [...s.allwellD].sort((a, b) => b.p - a.p), sat = s.allwellSat;
+  const rel = s.subjects.map(x => ({ n: x.n, g: r1(last(x.z) - x.ab) })), above = rel.filter(x => x.g >= .5), below = rel.filter(x => x.g <= -.5), at = rel.length - above.length - below.length;
+  return `<div class="grid g21" style="margin-top:16px">
+    <div class="card"><h3>Allwell results: ${s.allwell}th percentile overall, stanine ${stan(s.allwell)}</h3><p class="sub">Sat ${sat.getDate()} ${MON[sat.getMonth()]} ${sat.getFullYear()}, Year 7 entry. National percentile by domain; line marks the median.</p>
+      ${barRows(s.allwellD.map(d => ({ l: d.n, v: d.p, t: d.p + 'th', c: d.p >= 77 ? 'var(--s1)' : d.p >= 23 ? 'var(--s3)' : 'var(--s2)', tip: `<b>${d.n}</b><br>${d.p}th percentile &middot; stanine ${stan(d.p)}` })), { max: 100, mark: 50 })}
+      <div class="legend" style="margin-top:10px"><span><i class="box" style="background:var(--s1);opacity:1"></i>Stanine 7\u20139</span><span><i class="box" style="background:var(--s3);opacity:1"></i>Stanine 4\u20136</span><span><i class="box" style="background:var(--s2);opacity:1"></i>Stanine 1\u20133</span></div></div>
+    <div class="card tint"><h3>What his ability predicts</h3><p class="sub">Latest results against Allwell-predicted level</p>
+      <div class="kpis" style="grid-template-columns:repeat(3,minmax(0,1fr));margin-bottom:12px"><div class="kpi" style="background:var(--bg)"><div class="k">Above</div><div class="v up">${above.length}</div></div><div class="kpi" style="background:var(--bg)"><div class="k">At</div><div class="v">${at}</div></div><div class="kpi" style="background:var(--bg)"><div class="k">Below</div><div class="v down">${below.length}</div></div></div>
+      <p style="font-size:14px;color:var(--ink2);margin:0">Strongest domain: <b style="color:var(--ink)">${sorted[0].n}</b> (${sorted[0].p}th). Weakest: <b style="color:var(--ink)">${last(sorted).n}</b> (${last(sorted).p}th).${below.length ? ` Underperforming in ${below.map(x => x.n).join(', ')}.` : ''}${above.length ? ` Exceeding prediction in ${above.map(x => x.n).join(', ')}.` : ''}</p></div>
+  </div>`;
+}
+function afterLearning(s) {
+  const T = TERMS[termIx];
+  const vals = s.subjects.flatMap(x => [x.ab, x.z[termIx]]), qlo = Math.floor(Math.min(...vals) - .6), qhi = Math.ceil(Math.max(...vals) + .6);
+  scatter(document.getElementById('f-quad'), { x: [qlo, qhi], y: [qlo, qhi], diag: true, xl: 'Ability (z) →', yl: 'Performance (z)', corners: [['Outperforming', 'tl'], ['Below ability', 'br']], fx: v => v, fy: v => v,
+    pts: s.subjects.map(x => { const g = x.z[termIx] - x.ab; return { x: x.ab, y: x.z[termIx], c: g <= -.5 ? 'var(--s2)' : g >= .5 ? 'var(--s1)' : 'var(--gray)', lab: x.n, r: 6, tip: `<b>${x.n}</b><br>Ability ${x.ab} &middot; Performance ${x.z[termIx]}<br>Grade ${grade(x.z[termIx])}, ${T}` }; }) });
+  const ch = s.subjects.map(x => ({ x, d: x.z[3] - x.z[0] })).sort((a, b) => b.d - a.d), best = ch[0].x, worst = last(ch).x;
+  const others = s.subjects.filter(x => x !== best && x !== worst);
+  const zs = s.subjects.flatMap(x => x.z), zlo = Math.floor(Math.min(...zs) * 2 - .5) / 2, zhi = Math.ceil(Math.max(...zs) * 2 + .5) / 2;
+  lineChart(document.getElementById('f-ztrend'), { x: TERMS, y: [zlo, zhi], endLabels: true, fmt: (v, t) => t ? (v > 0 ? '+' : '') + v : v,
+    series: [{ n: best.n, v: best.z, c: 'var(--s1)', w: 2.5, lab: true }, { n: worst.n, v: worst.z, c: 'var(--s2)', w: 2.5, lab: true }, ...others.map(x => ({ n: x.n, v: x.z, c: 'var(--gray)', w: 1.2 }))] });
+  document.querySelectorAll('[data-term]').forEach(b => b.onclick = () => { termIx = +b.dataset.term; render(); });
+}
+
+function vPresence(s) {
+  const f = first(s), term = s.win[3][1], ytd = s.win[4][1], tot = s.wkAbs.reduce((a, b) => a + b, 0);
+  const D = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'], mxA = Math.max(...s.wkAbs), topD = s.wkAbs.indexOf(mxA), negTot = s.wkNeg.reduce((a, b) => a + b, 0), topN = s.wkNeg.indexOf(Math.max(...s.wkNeg));
+  const DF = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+  const rhythm = tot >= 3 && mxA / tot >= .35 ? `${DF[topD]}s account for ${Math.round(mxA / tot * 100)}% of concerning absences${negTot >= 3 && topN === topD ? `, and most negative entries also land on ${DF[topD]}s` : ''}.` : tot ? 'No single weekday dominates his absences.' : 'No concerning absences this term.';
+  const head = term >= 95 ? `${f}’s attendance is excellent at ${term}%` : term >= 90 ? `${f} is at ${term}% this term, above the 90% goal` : `${f}’s attendance has fallen to ${term}%, below the 90% goal`;
+  const peers = STUDENTS.filter(x => x.year === s.year), avgW = WL.map((_, w) => r1(avgA(peers.map(p => p.attW[w]))));
+  return `<div class="vh"><div><h1>${head}</h1><p>${rhythm}</p></div></div>
+  <div class="kpis">
+    <div class="kpi"><div class="k">Term 3 attendance</div><div class="v">${term}%</div><div class="d">Year ${s.year} average ${r1(avgA(peers.map(p => p.win[3][1])))}%</div></div>
+    <div class="kpi"><div class="k">Year to date</div><div class="v">${ytd}%</div><div class="d">Excl. co-curricular ${s.winEx[4][1]}%</div></div>
+    <div class="kpi"><div class="k">Concerning absences</div><div class="v">${tot}</div><div class="d">${s.p1} in period 1 &middot; longest run ${s.streak} day${s.streak === 1 ? '' : 's'}</div></div>
+    <div class="kpi"><div class="k">Late this term</div><div class="v">${s.lateClass + s.lateSchool}</div><div class="d">${s.lateSchool} to school &middot; ${s.lateClass} to class</div></div>
+  </div>
+  <div class="grid g21">
+    <div class="card"><h3>Weekly attendance</h3><p class="sub">Sessions attended, against the Year ${s.year} average. Dotted line marks the 90% goal.</p>
+      <div class="legend"><span><i style="background:var(--s1)"></i>${esc(f)}</span><span><i class="dash"></i>Year ${s.year} average</span></div><div class="fig" id="f-att"><svg></svg></div></div>
+    <div class="card"><h3>By time window</h3><p class="sub">Line marks the 90% goal</p>
+      ${barRows(s.win.map(([k, v], j) => ({ l: k, v, t: v + '%', c: v < 90 ? 'var(--s2)' : 'var(--s1)', tip: `<b>${k}</b><br>All sessions ${v}%<br>Excl. co-curricular ${s.winEx[j][1]}%` })), { min: 60, max: 100, mark: 90 })}
+      <h3 style="margin-top:16px;font-size:14px">Excluding co-curricular</h3>${barRows(s.winEx.map(([k, v]) => ({ l: k, v, t: v + '%', c: v < 90 ? 'var(--s2)' : 'var(--s1)' })), { min: 60, max: 100, mark: 90 })}
+      <p class="sub" style="margin-top:10px">Scales start at 60%.</p></div>
+  </div>
+  ${latenessHtml(s)}
+  <div class="grid g21" style="margin-top:16px">
+    <div class="card"><h3>Disengagement pattern: ${disBand(last(s.dis))[1].toLowerCase()} at ${Math.round(last(s.dis))}</h3><p class="sub">Weekly score, 0 to 100, higher is more concerning. Dotted lines mark 33 (moderate) and 66 (high).</p>
+      <div class="legend"><span><i style="background:var(--s2)"></i>${esc(f)}</span><span><i class="dash"></i>Year ${s.year} average</span></div><div class="fig" id="f-dis"><svg></svg></div></div>
+    <div class="card"><h3>What drives it</h3><p class="sub">Component scores this term, with their weight</p>
+      ${barRows(s.disC.map(c => ({ l: `${c.n} (${Math.round(c.wt * 100)}%)`, v: c.v, c: `var(--${disBand(c.v)[0]})`, tip: `<b>${c.n}</b><br>Score ${c.v}, weight ${Math.round(c.wt * 100)}%<br>Adds ${r1(c.v * c.wt)} points` })), { max: 100 })}
+      <div class="kpis" style="margin:14px 0 0;grid-template-columns:repeat(2,minmax(0,1fr))"><div class="kpi"><div class="k">Minutes lost, concerning lateness</div><div class="v">${s.minsLost}</div></div><div class="kpi"><div class="k">Concerning late arrivals</div><div class="v">${s.concLate}</div><div class="d">Most often ${s.disSubj}</div></div></div></div>
+  </div>
+  <div class="grid g111" style="margin-top:16px">
+    <div class="card"><h3>Concerning absences by weekday</h3><p class="sub">Term 3</p>${barRows(D.map((d, k) => ({ l: d, v: s.wkAbs[k], c: k === topD && mxA ? 'var(--s2)' : 'var(--s1)' })), { max: Math.max(4, mxA) })}</div>
+    <div class="card"><h3>Negative entries by weekday</h3><p class="sub">Term 3, same scale logic</p>${barRows(D.map((d, k) => ({ l: d, v: s.wkNeg[k], c: k === topN && negTot ? 'var(--s2)' : 'var(--s1)' })), { max: Math.max(4, ...s.wkNeg) })}</div>
+    <div class="card"><h3>By subject</h3><p class="sub">Term 3, lowest first</p>${barRows([...s.subjects].sort((a, b) => a.att - b.att).map(x => ({ l: x.n, v: x.att, t: x.att + '%', c: x.att < 90 ? 'var(--s2)' : 'var(--s1)' })), { min: 60, max: 100, mark: 90 })}</div>
+  </div>
+  <div class="card" style="margin-top:16px"><h3>Absence log</h3><p class="sub">${s.absLog.length} records this term</p>
+    ${s.absLog.length ? `<div class="scroll"><table class="stack"><thead><tr><th>Date</th><th>Period</th><th>Subject</th><th>Type</th><th>Reason</th><th class="n">Minutes</th><th>Status</th></tr></thead><tbody>${s.absLog.map(a => `<tr><td data-l="Date">${fmtD(a.d)}</td><td data-l="Period">${a.per}</td><td data-l="Subject">${a.subj}</td><td data-l="Type">${a.type}</td><td data-l="Reason">${a.reason}</td><td data-l="Minutes" class="n">${a.mins}</td><td data-l="Status">${a.ok ? '<span class="chip c-good">' + ICON.good + 'Explained</span>' : '<span class="chip c-crit">' + ICON.crit + 'Follow up</span>'}</td></tr>`).join('')}</tbody></table></div>` : '<div class="empty">No absences recorded this term.</div>'}
+  </div>`;
+}
+function latenessHtml(s) {
+  const f = first(s), t3 = s.lateEv.filter(e => e.w >= 10), K = k => t3.filter(e => e.kind === k), mins = a => a.reduce((x, e) => x + e.mins, 0);
+  const sch = K('school'), cls = K('class'), co = K('co'), tot = t3.length, totM = mins(t3), coShare = sch.length + cls.length + co.length ? Math.round(co.length / Math.max(1, cls.length + co.length) * 100) : 0;
+  const ytd = k => s.lateEv.filter(e => e.kind === k).length;
+  const head = tot ? `${tot} late arrivals this term cost ${totM} minutes, about ${r1(totM / 50)} lessons${co.length ? `; ${coShare}% of late-to-class arrivals were co-curricular` : ''}` : `${f} has not been late this term`;
+  const subs = [...new Set(t3.filter(e => e.kind !== 'school').map(e => e.subj))].map(n => ({ n, c: cls.filter(e => e.subj === n).length, o: co.filter(e => e.subj === n).length, m: mins(t3.filter(e => e.subj === n && e.kind !== 'school')) })).sort((a, b) => (b.c + b.o) - (a.c + a.o));
+  const mxS = Math.max(3, ...subs.map(x => x.c + x.o));
+  const acts = s.coActs.map(a => { const ev = co.filter(e => e.act === a.a); return { a, n: ev.length, m: mins(ev) }; });
+  const DN = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+  const kindChip = k => k === 'co' ? '<span class="chip" style="background:var(--s1soft);color:var(--s1)">Co-curricular</span>' : k === 'class' ? '<span class="chip c-crit">' + ICON.crit + 'Late to class</span>' : '<span class="chip" style="background:var(--panel);color:var(--s3);border:1px solid var(--line)">Late to school</span>';
+  return `<div class="vh" style="margin-top:34px;margin-bottom:14px"><div><h1 style="font-size:clamp(20px,2.4vw,26px);max-width:52ch">${head}</h1><p>Late to school is recorded at roll call. Late to class splits into concerning lateness and lateness caused by co-curricular commitments.</p></div></div>
+  <div class="kpis">
+    <div class="kpi"><div class="k">Late to school</div><div class="v">${sch.length}</div><div class="d">Term 3 &middot; ${ytd('school')} in Terms 2\u20133</div></div>
+    <div class="kpi"><div class="k">Late to class</div><div class="v">${cls.length + co.length}</div><div class="d">${cls.length} concerning &middot; ${co.length} co-curricular</div></div>
+    <div class="kpi"><div class="k">Minutes lost to lateness</div><div class="v">${totM}</div><div class="d">About ${r1(totM / 50)} lessons, Term 3</div></div>
+    <div class="kpi"><div class="k">Co-curricular share</div><div class="v">${coShare}%</div><div class="d">${mins(co)} minutes from co-curricular</div></div>
+  </div>
+  <div class="grid g21">
+    <div class="card"><h3>Late arrivals, week by week</h3><p class="sub">Terms 2\u20133, by type</p>
+      <div class="legend"><span><i class="box" style="background:var(--s3);opacity:1"></i>Late to school</span><span><i class="box" style="background:var(--s2);opacity:1"></i>Late to class, concerning</span><span><i class="box" style="background:var(--s1);opacity:1"></i>Late to class, co-curricular</span></div>
+      <div class="fig" id="f-late"><svg></svg></div></div>
+    <div class="card"><h3>Minutes lost to lateness</h3><p class="sub">Term 3, by type</p>
+      ${barRows([{ l: 'Late to school', v: mins(sch), c: 'var(--s3)' }, { l: 'Late to class, concerning', v: mins(cls), c: 'var(--s2)' }, { l: 'Late to class, co-curricular', v: mins(co), c: 'var(--s1)' }].map(x => ({ ...x, t: x.v + ' min', tip: `<b>${x.l}</b><br>${x.v} minutes` })), { max: Math.max(30, mins(sch), mins(cls), mins(co)) })}
+      <h3 style="margin-top:16px;font-size:14px">By weekday</h3>${barRows(DN.map((d, k) => { const ev = t3.filter(e => e.d.getDay() === k + 1); return { l: d, v: ev.length, tip: `<b>${d}</b><br>${ev.length} late arrivals, ${mins(ev)} minutes` }; }), { max: Math.max(3, ...DN.map((_, k) => t3.filter(e => e.d.getDay() === k + 1).length)) })}</div>
+  </div>
+  <div class="grid g11" style="margin-top:16px">
+    <div class="card"><h3>Late to class by subject</h3><p class="sub">Term 3, concerning and co-curricular</p>
+      ${subs.length ? subs.map(x => `<div class="brow" data-tip="${esc(`<b>${x.n}</b><br>Concerning: ${x.c}<br>Co-curricular: ${x.o}<br>${x.m} minutes lost`)}"><span>${x.n}</span><div class="btrack" style="display:flex;gap:2px;background:none"><i style="position:static;width:${x.c / mxS * 100}%;background:var(--s2);border-radius:${x.o ? '0' : '0 4px 4px 0'}"></i><i style="position:static;width:${x.o / mxS * 100}%;background:var(--s1)"></i></div><span class="num">${x.c + x.o}</span></div>`).join('') : '<div class="empty">No late-to-class records this term.</div>'}</div>
+    <div class="card tint"><h3>Co-curricular and class time</h3><p class="sub">Late arrivals traced to each activity, Term 3</p>
+      ${acts.length ? `<div class="scroll"><table><thead><tr><th>Activity</th><th>Affects</th><th class="n">Late</th><th class="n">Minutes</th></tr></thead><tbody>${acts.map(x => `<tr><td>${esc(x.a.a)}</td><td>${x.a.slot} ${x.a.subj}, ${x.a.days.map(d => DN[d]).join(' & ')}</td><td class="n">${x.n}</td><td class="n">${x.m}</td></tr>`).join('')}</tbody></table></div>
+      <p style="font-size:14px;color:var(--ink2);margin:12px 0 0">${co.length ? (() => { const top = [...acts].sort((a, b) => b.m - a.m)[0]; return `${esc(top.a.a)} accounts for ${Math.round(top.m / Math.max(1, mins(co)) * 100)}% of co-curricular minutes lost, all in ${top.a.slot} ${top.a.subj}. ${top.m >= 90 ? 'Worth agreeing a firm finish time with the activity staff.' : 'Within normal limits for now.'}`; })() : 'No co-curricular lateness this term.'}</p>` : `<div class="empty">${esc(f)} has no training or rehearsal commitments that overlap class time.</div>`}</div>
+  </div>
+  <details class="card" style="margin-top:16px"><summary style="cursor:pointer;font-weight:600">Lateness log, Term 3 (${t3.length} records)</summary>
+    ${t3.length ? `<div class="scroll" style="margin-top:10px"><table class="stack"><thead><tr><th>Date</th><th>Period</th><th>Subject</th><th>Type</th><th>Reason</th><th class="n">Minutes</th></tr></thead><tbody>${t3.map(e => `<tr><td data-l="Date">${fmtD(e.d)}</td><td data-l="Period">${e.per}</td><td data-l="Subject">${e.subj}</td><td data-l="Type">${kindChip(e.kind)}</td><td data-l="Reason">${esc(e.reason)}</td><td data-l="Minutes" class="n">${e.mins}</td></tr>`).join('')}</tbody></table></div>` : '<p>No records.</p>'}</details>`;
+}
+function afterPresence(s) {
+  stackCols(document.getElementById('f-late'), WL, [{ n: 'Late to school', c: 'var(--s3)', v: WL.map((_, w) => s.lateEv.filter(e => e.w === w && e.kind === 'school').length) }, { n: 'Late to class, concerning', c: 'var(--s2)', v: WL.map((_, w) => s.lateEv.filter(e => e.w === w && e.kind === 'class').length) }, { n: 'Late to class, co-curricular', c: 'var(--s1)', v: WL.map((_, w) => s.lateEv.filter(e => e.w === w && e.kind === 'co').length) }]);
+  const peers = STUDENTS.filter(x => x.year === s.year), avgW = WL.map((_, w) => r1(avgA(peers.map(p => p.attW[w]))));
+  const lo = Math.max(50, Math.floor(Math.min(...s.attW, ...avgW) / 5) * 5 - 5);
+  const avgD = WL.map((_, w) => r1(avgA(peers.map(p => p.dis[w]))));
+  lineChart(document.getElementById('f-dis'), { x: WL, xFull: WEEKS.map(w => `${w.lab}, ${fmtD(w.d)}`), y: [0, 100], refs: [{ v: 33 }, { v: 66 }], fmt: (v, t) => t ? Math.round(v) : v, series: [{ n: first(s), v: s.dis.map(r1), c: 'var(--s2)', w: 2.5, dotLast: true, lastLab: Math.round(last(s.dis)) }, { n: 'Average', v: avgD, c: 'var(--ink3)', dash: '4 4', w: 1.5 }] });
+  lineChart(document.getElementById('f-att'), { x: WL, xFull: WEEKS.map(w => `${w.lab}, ${fmtD(w.d)}`), y: [lo, 100], refs: [{ v: 90, l: '90% goal' }], fmt: (v, t) => t ? v + '%' : v + '%', series: [{ n: first(s), v: s.attW, c: 'var(--s1)', w: 2.5, dotLast: true }, { n: 'Average', v: avgW, c: 'var(--ink3)', dash: '4 4', w: 1.5 }] });
+}
+
+function vWellbeing(s) {
+  const f = first(s), tP = s.pos.slice(10).reduce((a, b) => a + b, 0), tN = s.neg.slice(10).reduce((a, b) => a + b, 0), ratio = tN ? r1(tP / tN) : null;
+  const head = !tN ? `${f} has had no negative entries this term` : ratio >= 3 ? `${f} earns ${ratio} positives for every negative` : ratio >= 1 ? `${f}’s positives outweigh negatives, but only ${ratio} to 1` : `Negative entries now outnumber positives for ${f}`;
+  const mxD = Math.max(1, ...s.depts.map(d => Math.max(d.p, d.q)));
+  return `<div class="vh"><div><h1>${head}</h1><p>Term 3 behaviour entries, pastoral themes and the full conduct log.</p></div></div>
+  <div class="kpis">
+    <div class="kpi"><div class="k">Positive entries</div><div class="v" style="color:var(--s1)">${tP}</div><div class="d">Term 3</div></div>
+    <div class="kpi"><div class="k">Negative entries</div><div class="v" style="color:var(--s2)">${tN}</div><div class="d">Term 3</div></div>
+    <div class="kpi"><div class="k">Net balance</div><div class="v">${tP - tN > 0 ? '+' : ''}${tP - tN}</div><div class="d">Positives minus negatives</div></div>
+    <div class="kpi"><div class="k">Behaviour score</div><div class="v">${Math.round(last(s.thriveD.beh))}</div><div class="d">${chip(last(s.thriveD.beh))}</div></div>
+  </div>
+  <div class="grid g21">
+    <div class="card"><h3>Behaviour balance, week by week</h3><p class="sub">Positive entries above the line, negative below</p>
+      <div class="legend"><span><i class="box" style="background:var(--s1);opacity:1"></i>Positive</span><span><i class="box" style="background:var(--s2);opacity:1"></i>Negative</span></div><div class="fig" id="f-beh"><svg></svg></div></div>
+    <div class="card"><h3>Where entries come from</h3><p class="sub">Term 3, by area</p>
+      ${s.depts.map(d => `<div style="padding:6px 0;border-top:1px solid var(--line)"><b style="font-size:14px">${d.n}</b>${barRows([{ l: 'Positive', v: d.p, c: 'var(--s1)' }, { l: 'Negative', v: d.q, c: 'var(--s2)' }], { max: mxD })}</div>`).join('')}</div>
+  </div>
+  <div class="grid g11" style="margin-top:16px">
+    <div class="card"><h3>Pastoral themes</h3><p class="sub">Classified from pastoral notes, Term 3</p>${s.themes.length ? barRows(s.themes.map(t => ({ l: t.n, v: t.c, c: t.n === 'Positive recognition' ? 'var(--s1)' : 'var(--s3)' })), { max: Math.max(...s.themes.map(t => t.c), 3) }) : '<div class="empty">No pastoral notes this term.</div>'}</div>
+    <div class="card"><h3>Conduct log</h3><p class="sub">Most recent first</p>
+      ${s.conduct.length ? `<ul class="tl">${s.conduct.map(c => `<li><time>${fmtD(c.d)}</time><span class="dot" style="background:${c.pos ? 'var(--s1)' : 'var(--s2)'}"></span><span><b style="font-weight:600">${esc(c.h)}</b><br><span style="color:var(--ink3);font-size:13px">${c.dept} &middot; ${c.by}</span></span></li>`).join('')}</ul>` : '<div class="empty">No entries this term.</div>'}</div>
+  </div>`;
+}
+function afterWellbeing(s) { divCols(document.getElementById('f-beh'), s.pos, s.neg, WL); }
+
+function vGrowth(s) {
+  const f = first(s), nrm = LEX_NORM[s.year], lx = last(s.lex), g8 = lx - s.lex[NW - 9], gAll = lx - s.lex[0];
+  const pos = lx >= nrm[2] ? 'above the national 75th percentile' : lx >= nrm[1] ? 'between the national median and 75th percentile' : lx >= nrm[0] ? 'between the national 25th percentile and median' : 'below the national 25th percentile';
+  const head = `${f} reads at ${lx}L, ${pos} for Year ${s.year}`;
+  const byCat = {}; s.acts.forEach(a => (byCat[a.c] = byCat[a.c] || []).push(a));
+  const lvC = { Exceeding: 'good', Strong: 'good', Developing: 'warn', 'Needs additional support': 'crit' };
+  return `<div class="vh"><div><h1>${head}</h1><p>Reading growth, potential, co-curricular footprint and external results.</p></div></div>
+  <div class="kpis">
+    <div class="kpi"><div class="k">Lexile now</div><div class="v">${lx}L</div><div class="d">Up ${gAll}L since Term 2</div></div>
+    <div class="kpi"><div class="k">Last 8 weeks</div><div class="v ${g8 >= 20 ? 'up' : 'down'}">+${g8}L</div><div class="d">Year median about +27L</div></div>
+    <div class="kpi"><div class="k">Quizzes, Term 3</div><div class="v">${s.quiz.slice(10).reduce((a, b) => a + b, 0)}</div><div class="d">Pass rate ${s.pass}%</div></div>
+    <div class="kpi"><div class="k">Allwell ability</div><div class="v">${s.allwell}<span style="font-size:15px">th</span></div><div class="d">Percentile on entry</div></div>
+  </div>
+  <div class="grid g21">
+    <div class="card"><h3>Reading level vs national band</h3><p class="sub">Shaded band is the Year ${s.year} national 25th–75th percentile</p>
+      <div class="legend"><span><i style="background:var(--s1)"></i>${esc(f)}</span><span><i class="dash"></i>Year ${s.year} median at school</span><span><i class="box" style="background:var(--gray)"></i>National 25th–75th</span></div><div class="fig" id="f-lex"><svg></svg></div></div>
+    <div class="card"><h3>Potential</h3><p class="sub">Extension and leadership potential, weekly</p>
+      <div class="legend"><span><i style="background:var(--s3)"></i>Extension</span><span><i style="background:var(--s2)"></i>Leadership</span></div><div class="fig" id="f-pot"><svg></svg></div></div>
+  </div>
+  <div class="grid g111" style="margin-top:16px">
+    <div class="card"><h3>Co-curricular footprint</h3><p class="sub">${s.acts.length} activit${s.acts.length === 1 ? 'y' : 'ies'} in Terms 2–3</p>
+      ${s.acts.length ? Object.entries(byCat).map(([c, list]) => `<div style="padding:6px 0;border-top:1px solid var(--line)"><b style="font-size:14px">${c}</b><div style="margin-top:4px">${list.map(a => `<span class="pill">${esc(a.a)} &middot; ${a.t}</span>`).join('')}</div></div>`).join('') : '<div class="empty">No co-curricular activity recorded.</div>'}</div>
+    <div class="card"><h3>External competitions</h3><p class="sub">2026, z-score against all entrants</p>
+      ${s.comps.length ? `<table><thead><tr><th>Competition</th><th>Result</th><th class="n">z</th></tr></thead><tbody>${s.comps.map(c => `<tr><td>${c.c}</td><td>${c.r}</td><td class="n">${c.z > 0 ? '+' : ''}${c.z}</td></tr>`).join('')}</tbody></table>` : '<div class="empty">No competitions entered this year.</div>'}</div>
+    <div class="card"><h3>NAPLAN</h3><p class="sub">Proficiency level by domain</p>
+      ${s.naplan.length ? s.naplan.map(n => `<b style="font-size:14px">Year ${n.yr}</b><table style="margin:4px 0 12px"><tbody>${n.res.map(([d, l]) => `<tr><td>${d}</td><td style="text-align:right"><span class="chip c-${lvC[l]}">${ICON[lvC[l]]}${l}</span></td></tr>`).join('')}</tbody></table>`).join('') : `<div class="empty">Year ${s.year} sits NAPLAN in Term 1 next year.</div>`}</div>
+  </div>`;
+}
+function afterGrowth(s) {
+  const nrm = LEX_NORM[s.year], lo = Math.floor(Math.min(nrm[0], ...s.lex) / 50) * 50 - 50, hi = Math.ceil(Math.max(nrm[2], ...s.lex) / 50) * 50 + 50;
+  lineChart(document.getElementById('f-lex'), { x: WL, xFull: WEEKS.map(w => `${w.lab}, ${fmtD(w.d)}`), y: [lo, hi], band: { lo: WL.map(() => nrm[0]), hi: WL.map(() => nrm[2]), n: 'National 25th–75th' }, fmt: (v, t) => t ? v + 'L' : v, series: [{ n: first(s), v: s.lex, c: 'var(--s1)', w: 2.5, dotLast: true, lastLab: last(s.lex) + 'L' }, { n: 'School median', v: s.lexCo, c: 'var(--ink3)', dash: '4 4', w: 1.5 }] });
+  lineChart(document.getElementById('f-pot'), { x: WL, xFull: WEEKS.map(w => `${w.lab}, ${fmtD(w.d)}`), y: [0, 100], endLabels: false, fmt: (v, t) => t ? Math.round(v) : v, series: [{ n: 'Extension', v: s.ext.map(r1), c: 'var(--s3)' }, { n: 'Leadership', v: s.lead.map(r1), c: 'var(--s2)' }] });
+}
+
+function vCare(s) {
+  const f = first(s);
+  if (!s.plan) return `<div class="vh"><div><h1>${f} has no support plan on record</h1><p>Lumen shows plan details, adjustments and the change history here when a plan exists.</p></div></div><div class="empty">No learning support plan, NCCD level or adjustments recorded for ${esc(s.name)}.</div>`;
+  const p = s.plan;
+  return `<div class="vh"><div><h1>${f} receives ${p.lv.toLowerCase()} adjustments</h1><p>NCCD category: ${p.cat}. ${p.ad.length} adjustments in place; last reviewed ${fmtD(last(p.log).d)}.</p></div></div>
+  <div class="grid g21">
+    <div class="card"><h3>Adjustments in place</h3><p class="sub">Teachers should apply these in every class</p>
+      <div>${p.ad.map(a => `<span class="pill" style="font-size:14px;padding:6px 10px">${a}</span>`).join('')}</div>
+      <h3 style="margin-top:18px">Provision</h3><p style="margin:4px 0 0;color:var(--ink2)">${p.prov}</p>
+      <h3 style="margin-top:18px">Voices</h3><div class="quote"><b style="color:var(--ink)">${esc(f)}</b><br>“${esc(p.sv)}”</div><div class="quote" style="border-color:var(--s3)"><b style="color:var(--ink)">Parent</b><br>“${esc(p.pv)}”</div></div>
+    <div class="card tint"><h3>Plan history</h3><p class="sub">Changes to level, adjustments and reviews</p>
+      <ul class="tl">${[...p.log].reverse().map(e => `<li><time>${fmtD(e.d)}</time><span class="dot" style="background:var(--s3)"></span><span><b style="font-weight:600">${e.t}</b><br><span style="color:var(--ink2)">${esc(e.v)}</span></span></li>`).join('')}</ul></div>
+  </div>`;
+}
+
+function vCohort(s) {
+  const peers = STUDENTS.filter(x => x.year === s.year);
+  const slip = peers.filter(p => mom(p) < -3).length, act = peers.filter(p => last(p.thrive) < 34).length;
+  const watch = [...peers].sort((a, b) => (last(a.thrive) + mom(a) * 2) - (last(b.thrive) + mom(b) * 2)).slice(0, 8);
+  return `<div class="vh"><div><h1>${slip} of ${peers.length} Year ${s.year} students are slipping this month</h1><p>Thrive now against its 4-week change. Click a dot or a name to open that student.</p></div></div>
+  <div class="grid g21">
+    <div class="card"><h3>Year ${s.year}: level and direction</h3><p class="sub">Thrive up, 4-week change across. ${act} below 34, needing a plan.</p><div class="fig tall" id="f-coh"><svg></svg></div></div>
+    <div class="card"><h3>Watchlist</h3><p class="sub">Lowest thrive, weighted by recent slide</p>
+      <table><thead><tr><th>Student</th><th class="n">Thrive</th><th class="n">4 wk</th><th>Disengagement</th></tr></thead><tbody>${watch.map(p => `<tr class="watch"><td><button class="row-btn" data-open="${p.i}">${esc(p.name)}</button></td><td class="n">${Math.round(last(p.thrive))}</td><td class="n ${mom(p) >= 0 ? 'up' : 'down'}">${mom(p) >= 0 ? '+' : '−'}${Math.abs(mom(p))}</td><td>${disChip(last(p.dis))}</td></tr>`).join('')}</tbody></table></div>
+  </div>`;
+}
+function afterCohort(s) {
+  const peers = STUDENTS.filter(x => x.year === s.year), mm = peers.map(mom), lim = Math.ceil(Math.max(8, ...mm.map(Math.abs)) / 2) * 2;
+  scatter(document.getElementById('f-coh'), { x: [-lim, lim], y: [0, 100], cross: [0, 50], xl: '4-week change →', yl: 'Thrive', corners: [['Thriving, rising', 'tr'], ['Thriving, slipping', 'tl'], ['Low, slipping', 'bl'], ['Low, recovering', 'br']],
+    pts: peers.map(p => ({ x: mom(p), y: last(p.thrive), c: p === s ? 'var(--s1)' : last(p.thrive) < 34 ? 'var(--s2)' : 'var(--gray)', hl: p === s, r: p === s ? 8 : 6, lab: p === s ? first(p) : null, id: p.i, tip: `<b>${esc(p.name)}</b><br>Thrive ${Math.round(last(p.thrive))} &middot; ${mom(p) >= 0 ? '+' : ''}${mom(p)} in 4 weeks` })),
+    click: p => select(STUDENTS[p.id], 'pulse') });
+  document.querySelectorAll('[data-open]').forEach(b => b.onclick = () => select(STUDENTS[+b.dataset.open], 'pulse'));
+}
+
+const V = { pulse: [vPulse, afterPulse], learning: [vLearning, afterLearning], attendance: [vPresence, afterPresence], wellbeing: [vWellbeing, afterWellbeing], growth: [vGrowth, afterGrowth], support: [vCare, () => {}], cohort: [vCohort, afterCohort] };
+function render() {
+  observers.forEach(o => o.disconnect()); observers = []; hideTip();
+  renderIdent(cur);
+  VIEWS.forEach(([k]) => { document.getElementById('v-' + k).classList.toggle('on', k === view); document.getElementById('tab-' + k).classList.toggle('on', k === view); });
+  const el = document.getElementById('v-' + view); el.innerHTML = V[view][0](cur); V[view][1](cur); bindRowTips(el);
+}
+function select(s, v) { cur = s; try { localStorage.setItem('lumen-student', s.i); } catch (e) {} closePop(); if (v && v !== view) location.hash = v; else render(); }
+
+/* ---------- picker ---------- */
+const pop = document.getElementById('pop'), q = document.getElementById('q'), plist = document.getElementById('plist'), pickbtn = document.getElementById('pickbtn');
+function fillList() { const t = q.value.trim().toLowerCase(); let h = ''; for (let y = 7; y <= 12; y++) { const l = STUDENTS.filter(s => s.year === y && (!t || s.name.toLowerCase().includes(t) || s.code.toLowerCase().includes(t))); if (l.length) h += `<div class="pgrp">Year ${y}</div>` + l.map(s => `<button class="popt${s === cur ? ' on' : ''}" role="option" data-i="${s.i}"><span>${esc(s.name)}</span>${chip(last(s.thrive))}</button>`).join(''); } plist.innerHTML = h || '<div class="pgrp">No match</div>'; }
+function closePop() { pop.classList.remove('open'); pickbtn.setAttribute('aria-expanded', 'false'); }
+pickbtn.onclick = e => { e.stopPropagation(); const o = pop.classList.toggle('open'); pickbtn.setAttribute('aria-expanded', o); if (o) { q.value = ''; fillList(); q.focus(); } };
+q.oninput = fillList;
+q.onkeydown = e => { if (e.key === 'Escape') { closePop(); pickbtn.focus(); } if (e.key === 'Enter') { const b = plist.querySelector('.popt'); if (b) select(STUDENTS[+b.dataset.i]); } };
+plist.onclick = e => { const b = e.target.closest('.popt'); if (b) select(STUDENTS[+b.dataset.i]); };
+document.addEventListener('click', e => { if (!e.target.closest('.picker')) closePop(); });
+
+function route() { const h = location.hash.slice(1); view = V[h] ? h : 'pulse'; render(); }
+addEventListener('hashchange', route);
+route();
+}
+</script>
+</body>
+</html>
